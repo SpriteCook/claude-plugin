@@ -1,0 +1,22 @@
+{
+  "name": "spritecook",
+  "version": "0.1.0",
+  "description": "Generate sprites, textures, and short animations in Claude with the SpriteCook MCP server and guided game-art workflows.",
+  "author": {
+    "name": "SpriteCook",
+    "email": "hello@spritecook.ai",
+    "url": "https://spritecook.ai"
+  },
+  "homepage": "https://spritecook.ai",
+  "repository": "https://github.com/spritecook/spritecook-claude-plugin",
+  "license": "MIT",
+  "keywords": [
+    "spritecook",
+    "game-art",
+    "sprites",
+    "pixel-art",
+    "animation",
+    "mcp",
+    "claude"
+  ]
+}
