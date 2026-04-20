@@ -15,6 +15,7 @@ Use this alongside the SpriteCook image or animation skill whenever SpriteCook M
 2. Prefer presigned download URLs over authenticated asset endpoints.
 3. Save important `asset_id` values in a local manifest whenever there is a writable workspace, unless the user explicitly wants a throwaway result.
 4. When a workflow involves follow-up generations or animations for the same subject, identify and reuse the canonical `asset_id` instead of generating from scratch again.
+5. If the agent loses track of generated asset IDs, recover them with `list_recent_assets(limit=...)` before failing.
 
 ## Credential Safety
 
@@ -45,6 +46,9 @@ Use this alongside the SpriteCook image or animation skill whenever SpriteCook M
 
 ## Downloading Assets
 
-- Prefer `_presigned_pixel_url` when saving the pixel PNG.
-- Prefer `_presigned_url` when saving the raw/original image.
+- For recent-asset recovery flows, prefer `list_recent_assets(limit=...)`.
+- Treat `sprite_url` as the single primary asset URL to inspect, save, or hand off to downstream tools.
+- Treat `spritesheet_url` as an optional secondary artifact. Use it only when present and only when you specifically need a spritesheet export.
+- For single-asset inspection flows, `get_asset_metadata(asset_id)` also exposes a primary `url` plus optional `spritesheet_url`.
+- Avoid relying on low-level internal fields such as `_presigned_pixel_url` or `_presigned_url` in agent-facing workflows unless no higher-level field is available.
 - Avoid direct authenticated download endpoints in skill-driven workflows unless a helper handles auth out of band.
