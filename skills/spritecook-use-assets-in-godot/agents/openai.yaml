@@ -1,0 +1,4 @@
+interface:
+  display_name: "Use SpriteCook Assets in Godot"
+  short_description: "Turn SpriteCook spritesheets into Godot animations"
+  default_prompt: "Use $spritecook-use-assets-in-godot to turn my SpriteCook animation spritesheets into a Godot SpriteFrames resource and AnimatedSprite2D node."

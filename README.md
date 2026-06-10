@@ -10,6 +10,7 @@ SpriteCook brings game art generation into Claude Code and the Claude desktop ap
   - `spritecook-workflow-essentials`
   - `spritecook-generate-sprites`
   - `spritecook-animate-assets`
+  - `spritecook-use-assets-in-godot`
 - [`assets/`](assets) — plugin icons and branding
 
 ## Local testing
@@ -30,7 +31,7 @@ Then inside the session:
 - Run `/plugin validate` to check the manifest and components.
 - Start `claude --debug` if you want to see plugin load details.
 
-The SpriteCook MCP tools and the three `spritecook-*` skills should appear once the plugin loads.
+The SpriteCook MCP tools and bundled `spritecook-*` skills should appear once the plugin loads.
 
 ### Claude desktop app
 
