@@ -1,63 +1,94 @@
 # SpriteCook Claude Plugin
 
-SpriteCook brings game art generation into Claude Code and the Claude desktop app with a hosted MCP server and bundled skills for sprite generation, animation workflows, and asset handling.
+Generate sprites, textures, tilesets, and short animations from Claude Code or the Claude desktop app.
 
-## What's included
+SpriteCook gives Claude access to a hosted MCP server for game-art workflows. You can ask Claude to create pixel art, HD game assets, character animation sheets, autotile tilesets, and Godot-ready asset packages while it works inside your project.
 
-- [`.claude-plugin/plugin.json`](.claude-plugin/plugin.json) — plugin manifest
-- [`.mcp.json`](.mcp.json) — SpriteCook hosted MCP server
-- [`skills/`](skills) — bundled SpriteCook workflow skills:
-  - `spritecook-workflow-essentials`
-  - `spritecook-generate-sprites`
-  - `spritecook-animate-assets`
-  - `spritecook-use-assets-in-godot`
-- [`assets/`](assets) — plugin icons and branding
+## What You Can Do
 
-## Local testing
+- Generate pixel-art sprites, items, UI elements, textures, and HD game assets.
+- Create tilesets for top-down, platformer, and isometric projects.
+- Animate existing SpriteCook assets into short looping sprite sheets.
+- Check generation jobs, credit balance, and recent assets.
+- Export generated character animations into Godot-friendly files.
 
-The same plugin works for both Claude Code (CLI) and the Claude desktop app.
+## Install
 
-### Claude Code (CLI)
+### Claude Code
 
-Load the plugin directly from this folder:
+Clone this repo, then load the plugin from the checkout:
 
 ```bash
-claude --plugin-dir "/path/to/claude-plugin"
+git clone https://github.com/SpriteCook/claude-plugin.git
+cd claude-plugin
+claude --plugin-dir .
 ```
 
-Then inside the session:
+Then inside Claude Code:
 
-- Run `/reload-plugins` after editing any plugin file.
+- Run `/reload-plugins` after editing plugin files.
 - Run `/plugin validate` to check the manifest and components.
-- Start `claude --debug` if you want to see plugin load details.
+- Start `claude --debug` if you want plugin load details.
 
-The SpriteCook MCP tools and bundled `spritecook-*` skills should appear once the plugin loads.
-
-### Claude desktop app
+### Claude Desktop
 
 Install the plugin locally from inside the app:
 
-```
-/plugin install ./
+```text
+/plugin install /path/to/claude-plugin
 ```
 
-Run that command with this folder as the working directory, or pass the absolute path. Restart the app once, then complete the SpriteCook OAuth flow the first time you call a SpriteCook tool.
+Use the path to your local checkout. Restart the app once, then complete the SpriteCook sign-in flow the first time you call a SpriteCook tool.
+
+## Try It
+
+Ask Claude:
+
+```text
+Use SpriteCook to generate a 64x64 transparent pixel-art slime enemy and save the result in my project.
+```
+
+Other useful prompts:
+
+- `Use SpriteCook to list my current image generation models and credit costs.`
+- `Use SpriteCook to generate a top-down mossy dungeon floor tileset.`
+- `Use SpriteCook to list my recent assets and inspect the newest one.`
+- `Use SpriteCook to check my credit balance.`
+- `Use SpriteCook to package my completed character animation run for Godot.`
+
+## What's Included
+
+- [`.claude-plugin/plugin.json`](.claude-plugin/plugin.json) - plugin manifest
+- [`.mcp.json`](.mcp.json) - hosted SpriteCook MCP server configuration
+- [`skills/`](skills) - bundled SpriteCook workflow skills:
+  - `spritecook-workflow-essentials`
+  - `spritecook-generate-sprites`
+  - `spritecook-generate-tilesets`
+  - `spritecook-animate-assets`
+  - `spritecook-use-assets-in-godot`
+  - `spritecook-use-dual-grid-tilesets`
+- [`assets/`](assets) - plugin icon and branding
 
 ## Authentication
 
-The plugin points Claude at the hosted SpriteCook MCP endpoint:
+The plugin connects to the hosted SpriteCook MCP endpoint:
 
 - `https://api.spritecook.ai/mcp/claude`
 
-Claude handles authentication through the SpriteCook OAuth flow on first protected use.
+Claude handles authentication through SpriteCook OAuth on first protected use. Do not paste SpriteCook API keys, OAuth tokens, cookies, or other secrets into Claude chat.
 
-## Skill source of truth
+## Known Limitations
 
-Skills are maintained separately in:
+- Generation and animation tools spend SpriteCook credits.
+- Long-running jobs may return a queued or active status before completion; ask Claude to check the job status again.
+- Animation tools require an existing SpriteCook `asset_id`. Local images must be imported through SpriteCook before animation.
+- Signed download URLs expire and can be refreshed by asking Claude to check the asset or job again.
 
-- `/path/to/spritecook-skills`
+## Privacy and Support
 
-When those skills change, sync the updated `SKILL.md` files into [`skills/`](skills) and bump the version in [`.claude-plugin/plugin.json`](.claude-plugin/plugin.json) so Claude refreshes its installed cache.
+- Privacy policy: https://www.spritecook.ai/privacy
+- Plugin and MCP support: kimo@spritecook.ai
+- Privacy requests: privacy@spritecook.ai
 
 ## License
 
