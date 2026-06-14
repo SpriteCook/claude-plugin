@@ -1,3 +1,5 @@
+[![Listed on ClaudePluginHub](https://www.claudepluginhub.com/badge/spritecook-spritecook)](https://www.claudepluginhub.com/plugins/spritecook-spritecook?ref=badge)
+
 # SpriteCook Claude Plugin
 
 Generate sprites, textures, tilesets, and short animations from Claude Code or the Claude desktop app.
