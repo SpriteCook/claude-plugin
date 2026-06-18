@@ -1,6 +1,6 @@
 ---
 name: spritecook-workflow-essentials
-description: "Shared workflow rules for SpriteCook. Use together with spritecook-generate-sprites or spritecook-animate-assets for credits, downloads, asset manifests, safe auth handling, and recommended defaults."
+description: "Shared workflow rules for SpriteCook. Use together with SpriteCook generation, animation, import, background-removal, and asset-organization workflows for credits, downloads, asset manifests, safe auth handling, and recommended defaults."
 ---
 
 # SpriteCook Workflow Essentials
@@ -23,6 +23,27 @@ Use this alongside the SpriteCook image or animation skill whenever SpriteCook M
 - Never print, persist, echo, or inline API keys or `Authorization` headers in agent output.
 - Prefer SpriteCook MCP tools, presigned URLs, or a preconfigured local connector/helper that handles authentication outside the prompt.
 - If a raw API call is required and no authenticated helper exists, stop and ask the user to configure one.
+
+## Asset Library Tools
+
+- Use `import_asset(image=..., pixel=..., display_name=..., file_name=...)` when a local file, data URL, or raw base64 image needs to become a SpriteCook asset before animation, editing, reference, or tileset-style reuse.
+- Use `remove_background(asset_id=...)` for owned SpriteCook assets that need a transparent cutout. Use `remove_background(image=...)` only when the user supplies local image data and does not need a reusable imported asset first.
+- Use `update_asset_label(asset_id=..., label=...)` after generation, import, or cleanup when a clearer asset name will help the project manifest or future agent steps.
+- Do not tell the user to use the SpriteCook HTTP API for local image import when the SpriteCook MCP tools are available. Prefer `import_asset`.
+
+## Preset Tools
+
+- When the user says to use one of their saved presets, call `list_presets(query=...)` first and identify the best matching preset by title, mode, and status.
+- Then call `get_preset_settings(preset_id=...)` and apply the returned settings as guidance for the next SpriteCook MCP generation or edit tool.
+- Treat presets as saved settings and reference guidance, not as a separate generation path.
+- Private draft presets can return owned reference asset IDs in `settings.reference.styleAssetIds`, `contextAssetId`, and `editAssetId`.
+- For still-image generation, map `settings.reference.styleAssetIds` to `style_asset_ids` on `generate_game_art`; use up to 10 IDs.
+- Treat style guide images as ambient style context for new related assets; agents do not need to restate them in the prompt unless calling out a specific visual trait.
+- Map `settings.reference.contextAssetId` to `reference_asset_id` when the preset provides one specific visual/context reference asset.
+- Use `reference_asset_id` when a prompt refers to one specific source or context asset, such as a particular building, character, prop, or part.
+- Use `edit_asset_id` only for the one asset being directly modified.
+- Published presets can return frozen preset media URLs in `settings.reference.styleUploadUrls`, `contextUploadUrl`, and `editUploadUrl`; use these only when the target MCP tool supports upload URL references.
+- Use `save_private_preset(...)` only when the user explicitly asks to save a private preset. It creates a private draft preset only and does not publish, share, or submit anything for moderation.
 
 ## Defaults
 

@@ -1,6 +1,6 @@
 ---
 name: spritecook-generate-tilesets
-description: "Tileset generation guide for SpriteCook. Use with spritecook-workflow-essentials when generating autotile tilesets through SpriteCook MCP/API, choosing tile sizes, using reference/edit/style asset IDs, and saving generated tileset asset IDs."
+description: "Tileset generation guide for SpriteCook. Use with spritecook-workflow-essentials when generating autotile tilesets through SpriteCook MCP tools, choosing tile sizes, using reference/edit/style asset IDs, and saving generated tileset asset IDs."
 ---
 
 # SpriteCook Generate Tilesets
@@ -49,10 +49,11 @@ Generate a game-ready tileset. The tool waits up to 90 seconds and returns a job
 
 ## Reference Workflow
 
-- If the user has a local image, first import it with the HTTP API endpoint `POST /v1/api/assets/import`, then pass the returned asset ID.
+- When the user asks to use a saved tileset preset, use `list_presets(mode="tileset", query=...)` and `get_preset_settings` first, then map the returned tileset settings into `generate_tileset`.
+- If the user has a local image, first call `import_asset`, then pass the returned asset ID as `reference_asset_id`, `edit_asset_id`, or `style_asset_id`.
 - Use `reference_asset_id` when the existing tileset should guide a new generation while preserving its tile size/layout.
 - Use `edit_asset_id` when the user wants a direct change to an existing tileset.
-- Use `style_asset_id` when the image should affect only visual style, not tileset layout.
+- Use `style_asset_id` as a style guide image when the image should affect only visual style, palette, proportions, and rendering, not tileset layout. The prompt does not need to repeat that the image is a style guide unless the user asks to emphasize a specific detail.
 - When referencing or editing a tileset, do not change `style_mode`, `perspective`, `piece_set`, `tile_size`, or `elevation`; SpriteCook inherits and locks those settings.
 
 ## Prompting

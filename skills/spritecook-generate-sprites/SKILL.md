@@ -33,10 +33,17 @@ Generate game art assets from a text prompt. Supports both pixel art and detaile
 | `resolution` | string | "1K" | "1K", "2K", or "4K" |
 | `quality` | string | "medium" | GPT-Image-2 quality tier: "low", "medium", or "high". Higher quality costs more credits. |
 | `colors` | string[] | null | Hex color palette, max 8 |
-| `reference_asset_id` | string | null | Asset ID from a previous generation to use as style reference |
+| `style_asset_ids` | string[] | null | Owned asset IDs to use as ambient style guide images, max 10 |
+| `reference_asset_id` | string | null | Asset ID to use as one specific visual/context reference |
 | `edit_asset_id` | string | null | Asset ID to edit/modify with the new prompt |
 
-`reference_asset_id` and `edit_asset_id` are mutually exclusive. The referenced asset must belong to your account.
+Referenced assets must belong to the user's account. `style_asset_ids` can be combined with either `reference_asset_id` or `edit_asset_id`. Do not combine `reference_asset_id` and `edit_asset_id`.
+
+## Reference Roles
+
+- Use `style_asset_ids` for style guide images: ambient style, palette, proportions, rendering, and art-direction context. This is the normal choice when generating a new related asset that should match an existing collection, such as giving three existing buildings as style guides before asking for a new building type. SpriteCook already treats these images as style references; mention them in the prompt only when the user wants a specific trait called out.
+- Use `reference_asset_id` when one specific asset is the source or context for the prompt, such as `make a building in a similar style to this one`, `give me just the door sprite`, or `use this character as the visual reference`.
+- Use `edit_asset_id` when the user wants a direct modification of one existing asset, such as `make this roof red`, `remove the sign`, or `change the helmet color`.
 
 ### `list_generation_models`
 
@@ -98,18 +105,20 @@ Check a guided character animation run by id. Returns run status, item statuses,
 
 - Be specific about subject, pose, camera/view angle, and key materials.
 - Call `list_generation_models` when current model names, pixel-art support, quality options, or credit costs matter.
+- When the user asks to use a saved preset, use `list_presets` and `get_preset_settings` first, then map the returned prompt, style, model, size, color, and reference guidance into `generate_game_art`.
 - Use `list_character_workflows`, `generate_character`, and `generate_character_animations` when the user wants a directly usable animated character set.
 - Default to pixel art unless the user asks for HD, detailed, smooth, realistic, or high-res output.
 - When the user wants the same character or item in multiple outputs, generate one canonical still asset first and reuse that asset ID.
-- Use `reference_asset_id` for follow-up generations that should keep the same character or visual style.
-- Use `edit_asset_id` only when modifying an existing SpriteCook asset.
+- Use `style_asset_ids` for follow-up generations that should keep the same visual style, especially when a preset returns `settings.reference.styleAssetIds`.
+- Use `reference_asset_id` when the prompt depends on one specific visual/context reference asset.
+- Use `edit_asset_id` when directly modifying one existing SpriteCook asset.
 - Do not generate multiple independent still variations when the real goal is one consistent character plus later animations.
 - Prefer `smart_crop_mode="tightest"` unless the user explicitly asks for `"power_of_2"`.
 
 ## Consistency Rules
 
 - For a motion set like idle, walk, attack, or hurt: generate the base character once, then animate that exact `asset_id` separately for each motion.
-- For asset variations that should stay recognizably the same design, prefer `edit_asset_id` or `reference_asset_id` over a brand-new unreferenced generation.
+- For asset variations that should stay recognizably the same design, prefer `edit_asset_id` for direct modification or `style_asset_ids` for style guidance over a brand-new unreferenced generation.
 - Only skip a reference when the user explicitly wants different designs to explore.
 
 ## Pixel Art vs Detailed Art
