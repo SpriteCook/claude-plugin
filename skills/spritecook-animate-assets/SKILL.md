@@ -32,11 +32,12 @@ Animate an existing SpriteCook asset into a short pixel-art or detailed animatio
 ## Workflow
 
 1. If the user already has a SpriteCook asset, pass its `asset_id` directly to `animate_game_art`.
-2. If the user only has a local image file, data URL, or raw base64 image, call `import_asset` first and use the returned `asset_id`.
-3. Use the returned `asset_id` in `animate_game_art`.
-4. Keep `pixel` omitted unless you need to force a mode.
+2. If the user only has a local image file path, use `spritecook-upload-assets` to call `create_asset_upload`, upload the bytes, then call `finalize_asset_upload`.
+3. If the user supplies a small data URL or raw base64 value, call `import_asset` first and use the returned `asset_id`.
+4. Use the returned `asset_id` in `animate_game_art`.
+5. Keep `pixel` omitted unless you need to force a mode.
 
-The import step is where the source image enters SpriteCook. It is not the animation call itself. Use the MCP `import_asset` tool when it is available.
+The upload/import step is where the source image enters SpriteCook. It is not the animation call itself. Use MCP asset upload tools when they are available.
 
 ## Consistency Rules
 

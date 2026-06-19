@@ -50,7 +50,8 @@ Generate a game-ready tileset. The tool waits up to 90 seconds and returns a job
 ## Reference Workflow
 
 - When the user asks to use a saved tileset preset, use `list_presets(mode="tileset", query=...)` and `get_preset_settings` first, then map the returned tileset settings into `generate_tileset`.
-- If the user has a local image, first call `import_asset`, then pass the returned asset ID as `reference_asset_id`, `edit_asset_id`, or `style_asset_id`.
+- If the user has a local image file path, use `spritecook-upload-assets` first, then pass the returned asset ID as `reference_asset_id`, `edit_asset_id`, or `style_asset_id`.
+- If the user supplies a small data URL or raw base64 value, call `import_asset` first, then pass the returned asset ID as `reference_asset_id`, `edit_asset_id`, or `style_asset_id`.
 - Use `reference_asset_id` when the existing tileset should guide a new generation while preserving its tile size/layout.
 - Use `edit_asset_id` when the user wants a direct change to an existing tileset.
 - Use `style_asset_id` as a style guide image when the image should affect only visual style, palette, proportions, and rendering, not tileset layout. The prompt does not need to repeat that the image is a style guide unless the user asks to emphasize a specific detail.

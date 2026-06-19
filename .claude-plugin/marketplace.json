@@ -12,7 +12,7 @@
       "name": "spritecook",
       "source": "./",
       "description": "Generate sprites, textures, and short animations in Claude with the SpriteCook MCP server and guided game-art workflows.",
-      "version": "0.1.4",
+      "version": "0.1.5",
       "author": {
         "name": "SpriteCook",
         "email": "kimo@spritecook.ai"

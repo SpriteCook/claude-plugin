@@ -67,6 +67,8 @@ Other useful prompts:
   - `spritecook-generate-sprites`
   - `spritecook-generate-tilesets`
   - `spritecook-animate-assets`
+  - `spritecook-upload-assets`
+  - `spritecook-use-presets`
   - `spritecook-use-assets-in-godot`
   - `spritecook-use-dual-grid-tilesets`
 - [`assets/`](assets) - plugin icon and branding
@@ -83,7 +85,7 @@ Claude handles authentication through SpriteCook OAuth on first protected use. D
 
 - Generation and animation tools spend SpriteCook credits.
 - Long-running jobs may return a queued or active status before completion; ask Claude to check the job status again.
-- Animation tools require an existing SpriteCook `asset_id`. Local images must be imported through SpriteCook before animation.
+- Animation tools require an existing SpriteCook `asset_id`. Local images must be uploaded or imported through SpriteCook before animation.
 - Signed download URLs expire and can be refreshed by asking Claude to check the asset or job again.
 
 ## Privacy and Support

@@ -26,10 +26,11 @@ Use this alongside the SpriteCook image or animation skill whenever SpriteCook M
 
 ## Asset Library Tools
 
-- Use `import_asset(image=..., pixel=..., display_name=..., file_name=...)` when a local file, data URL, or raw base64 image needs to become a SpriteCook asset before animation, editing, reference, or tileset-style reuse.
+- Use `spritecook-upload-assets` plus `create_asset_upload` and `finalize_asset_upload` when a local file path needs to become a SpriteCook asset before animation, editing, reference, or tileset-style reuse.
+- Use `import_asset(image=..., pixel=..., display_name=..., file_name=...)` only when the image is already a small data URL or raw base64 value that can be passed without printing it.
 - Use `remove_background(asset_id=...)` for owned SpriteCook assets that need a transparent cutout. Use `remove_background(image=...)` only when the user supplies local image data and does not need a reusable imported asset first.
 - Use `update_asset_label(asset_id=..., label=...)` after generation, import, or cleanup when a clearer asset name will help the project manifest or future agent steps.
-- Do not tell the user to use the SpriteCook HTTP API for local image import when the SpriteCook MCP tools are available. Prefer `import_asset`.
+- Do not tell the user to use the SpriteCook HTTP API or API keys for local image import when the SpriteCook MCP tools are available. Prefer the upload bridge for file paths.
 
 ## Preset Tools
 

@@ -39,6 +39,8 @@ Generate game art assets from a text prompt. Supports both pixel art and detaile
 
 Referenced assets must belong to the user's account. `style_asset_ids` can be combined with either `reference_asset_id` or `edit_asset_id`. Do not combine `reference_asset_id` and `edit_asset_id`.
 
+If the user provides local image file paths for these references, use `spritecook-upload-assets` first and pass the returned asset IDs into the appropriate reference field.
+
 ## Reference Roles
 
 - Use `style_asset_ids` for style guide images: ambient style, palette, proportions, rendering, and art-direction context. This is the normal choice when generating a new related asset that should match an existing collection, such as giving three existing buildings as style guides before asking for a new building type. SpriteCook already treats these images as style references; mention them in the prompt only when the user wants a specific trait called out.
