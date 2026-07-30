@@ -77,7 +77,7 @@ Other useful prompts:
 
 The plugin connects to the hosted SpriteCook MCP endpoint:
 
-- `https://api.spritecook.ai/mcp/claude`
+- `https://mcp.spritecook.ai/mcp/claude`
 
 Claude handles authentication through SpriteCook OAuth on first protected use. Do not paste SpriteCook API keys, OAuth tokens, cookies, or other secrets into Claude chat.
 
