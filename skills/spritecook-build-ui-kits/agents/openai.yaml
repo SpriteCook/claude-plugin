@@ -1,0 +1,4 @@
+interface:
+  display_name: "Build SpriteCook UI Kits"
+  short_description: "Turn UI concepts into reusable game components"
+  default_prompt: "Use $spritecook-build-ui-kits to create a coherent game UI concept, extract reusable components, and finalize the UI kit."

@@ -9,6 +9,8 @@ Use this skill for still-image generation. Pair it with `spritecook-workflow-ess
 
 **Requires:** SpriteCook MCP server connected to your editor. Set up with `npx spritecook-mcp setup` or see [spritecook.ai](https://spritecook.ai).
 
+For a complete UI screen or cohesive UI system, stop and use `spritecook-build-ui-kits` instead. The UI-kit workflow creates one coherent concept before extracting reusable controls and states. Keep `generate_game_art(mode="ui")` for one isolated icon, badge, button, control, divider, frame, or decoration.
+
 ## Tool
 
 ### `generate_game_art`
@@ -29,7 +31,7 @@ Generate game art assets from a text prompt. Supports both pixel art and detaile
 | `smart_crop` | bool | true | Auto-crop to content bounds |
 | `smart_crop_mode` | string | "tightest" | Use `"tightest"` by default. Use `"power_of_2"` only when explicitly requested |
 | `model` | string | null | Optional generation model. Call `list_generation_models` for current options and costs. |
-| `mode` | string | "assets" | "assets", "texture", or "ui" |
+| `mode` | string | "assets" | "assets", "texture", or "ui". Use `"ui"` only for one isolated UI asset; use `spritecook-build-ui-kits` for screens or systems. |
 | `resolution` | string | "1K" | "1K", "2K", or "4K" |
 | `quality` | string | "medium" | GPT-Image-2 quality tier: "low", "medium", or "high". Higher quality costs more credits. |
 | `colors` | string[] | null | Hex color palette, max 8 |
@@ -109,6 +111,7 @@ Check a guided character animation run by id. Returns run status, item statuses,
 - Call `list_generation_models` when current model names, pixel-art support, quality options, or credit costs matter.
 - When the user asks to use a saved preset, use `list_presets` and `get_preset_settings` first, then map the returned prompt, style, model, size, color, and reference guidance into `generate_game_art`.
 - Use `list_character_workflows`, `generate_character`, and `generate_character_animations` when the user wants a directly usable animated character set.
+- Route menus, HUDs, inventories, dialogs, settings screens, overlays, and other complete UI compositions to `spritecook-build-ui-kits`.
 - Default to pixel art unless the user asks for HD, detailed, smooth, realistic, or high-res output.
 - When the user wants the same character or item in multiple outputs, generate one canonical still asset first and reuse that asset ID.
 - Use `style_asset_ids` for follow-up generations that should keep the same visual style, especially when a preset returns `settings.reference.styleAssetIds`.

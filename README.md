@@ -2,13 +2,14 @@
 
 # SpriteCook Claude Plugin
 
-Generate sprites, textures, tilesets, and short animations from Claude Code or the Claude desktop app.
+Generate sprites, cohesive UI kits, textures, tilesets, and short animations from Claude Code or the Claude desktop app.
 
 SpriteCook gives Claude access to a hosted MCP server for game-art workflows. You can ask Claude to create pixel art, HD game assets, character animation sheets, autotile tilesets, and Godot-ready asset packages while it works inside your project.
 
 ## What You Can Do
 
 - Generate pixel-art sprites, items, UI elements, textures, and HD game assets.
+- Build complete menus, HUDs, inventories, dialogs, and other cohesive UI systems from one shared concept.
 - Create tilesets for top-down, platformer, and isometric projects.
 - Animate existing SpriteCook assets into short looping sprite sheets.
 - Check generation jobs, credit balance, and recent assets.
@@ -54,6 +55,7 @@ Other useful prompts:
 
 - `Use SpriteCook to list my current image generation models and credit costs.`
 - `Use SpriteCook to generate a top-down mossy dungeon floor tileset.`
+- `Use SpriteCook to design an inventory-screen concept, extract reusable components, and finalize the UI kit.`
 - `Use SpriteCook to list my recent assets and inspect the newest one.`
 - `Use SpriteCook to check my credit balance.`
 - `Use SpriteCook to package my completed character animation run for Godot.`
@@ -64,6 +66,7 @@ Other useful prompts:
 - [`.mcp.json`](.mcp.json) - hosted SpriteCook MCP server configuration
 - [`skills/`](skills) - bundled SpriteCook workflow skills:
   - `spritecook-workflow-essentials`
+  - `spritecook-build-ui-kits`
   - `spritecook-generate-sprites`
   - `spritecook-generate-tilesets`
   - `spritecook-animate-assets`

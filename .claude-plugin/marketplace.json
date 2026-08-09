@@ -1,7 +1,7 @@
 {
   "name": "spritecook",
   "metadata": {
-    "description": "The SpriteCook plugin for Claude Code and Claude Desktop. AI-generated game art, sprites, and short animations."
+    "description": "The SpriteCook plugin for Claude Code and Claude Desktop. AI-generated game art, cohesive UI kits, sprites, and short animations."
   },
   "owner": {
     "name": "SpriteCook",
@@ -11,8 +11,8 @@
     {
       "name": "spritecook",
       "source": "./",
-      "description": "Generate sprites, textures, and short animations in Claude with the SpriteCook MCP server and guided game-art workflows.",
-      "version": "0.1.6",
+      "description": "Generate sprites, cohesive UI kits, textures, and short animations in Claude with SpriteCook's guided game-art workflows.",
+      "version": "0.1.7",
       "author": {
         "name": "SpriteCook",
         "email": "kimo@spritecook.ai"

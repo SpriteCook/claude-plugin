@@ -1,6 +1,6 @@
 ---
 name: spritecook-workflow-essentials
-description: "Shared workflow rules for SpriteCook. Use together with SpriteCook generation, animation, import, background-removal, and asset-organization workflows for credits, downloads, asset manifests, safe auth handling, and recommended defaults."
+description: "Shared workflow rules for SpriteCook. Use together with SpriteCook generation, UI-kit building, animation, import, background-removal, and asset-organization workflows for credits, downloads, asset manifests, safe auth handling, and recommended defaults."
 ---
 
 # SpriteCook Workflow Essentials
@@ -32,6 +32,16 @@ Use this alongside the SpriteCook image or animation skill whenever SpriteCook M
 - Use `update_asset_label(asset_id=..., label=...)` after generation, import, or cleanup when a clearer asset name will help the project manifest or future agent steps.
 - Do not tell the user to use the SpriteCook HTTP API or API keys for local image import when the SpriteCook MCP tools are available. Prefer the upload bridge for file paths.
 
+## UI Kit Tools
+
+- Use `spritecook-build-ui-kits` for complete UI screens and cohesive systems. Build or select one concept first, then generate sheets and extract components from that shared visual source.
+- If the UI-kit MCP tools are missing, refresh or reconnect the SpriteCook integration. Do not silently substitute several unrelated `generate_game_art(mode="ui")` calls for a full screen.
+- Pass an existing owned concept to `create_ui_kit(concept_asset_id=...)` when the user or agent already has a suitable SpriteCook asset. Do not regenerate it merely to enter the UI-kit workflow.
+- Keep `generate_game_art(mode="ui")` for a single isolated UI asset such as an icon, badge, control, divider, or decoration.
+- Treat UI-kit concept and sheet generation as multi-asset work: check credits first, preserve the kit ID, and poll with `get_ui_kit` until queued jobs settle.
+- Keep `gpt-image-2` as the UI-kit model default. Gemini UI-kit concepts require an account that independently supports 2K generation.
+- Inspect extraction `quality_summary` before finalization and follow `spritecook-build-ui-kits` when it requires corrections.
+
 ## Preset Tools
 
 - When the user says to use one of their saved presets, call `list_presets(query=...)` first and identify the best matching preset by title, mode, and status.
@@ -51,8 +61,9 @@ Use this alongside the SpriteCook image or animation skill whenever SpriteCook M
 - Prefer `smart_crop_mode="tightest"` for the best default results. Use `"power_of_2"` only when the user explicitly asks for it.
 - Model guidance:
   - `gemini-2.5-flash-image`: cheapest
-  - `gemini-3.1-flash-image-preview`: recommended default
-  - `gemini-3-pro-image-preview`: most expensive
+  - `gemini-3.1-flash-image`: recommended default for ordinary still-image generation
+  - `gemini-3-pro-image`: most expensive
+- Focused workflow defaults override this general guidance. In particular, UI kits default to `gpt-image-2` because their concept and sheet pipeline uses 2K output.
 
 ## Asset Manifest
 
