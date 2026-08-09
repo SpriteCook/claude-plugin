@@ -40,6 +40,8 @@ For UI kits, use `gpt-image-2` by default. The accepted canonical alternatives a
 
 Use `state_mode="visible-only"` when the user needs only what appears in the concept. Use `state_mode="complete-states"` for production control families that should include normal, hover/focus, pressed, disabled, checked, or selected variants.
 
+Set the state mode when creating the kit. Omit `state_mode` from `generate_ui_kit_component_sheets` to preserve that stored choice; pass it there only when intentionally overriding the kit for this sheet attempt.
+
 An existing `concept_asset_id` is the specific screen concept being decomposed. It is different from `style_asset_ids`, which provide ambient visual guidance.
 
 ## Refining Results
