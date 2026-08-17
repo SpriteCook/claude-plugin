@@ -12,7 +12,7 @@ Use this alongside the SpriteCook image or animation skill whenever SpriteCook M
 ## Preflight Checklist
 
 1. Check credits first with `get_credit_balance` before starting a batch or multi-asset workflow.
-2. Prefer presigned download URLs over authenticated asset endpoints.
+2. Use each asset's `sprite_url` as the canonical downloadable image URL. Use `spritesheet_url` only when it is present and specifically needed.
 3. Save important `asset_id` values in a local manifest whenever there is a writable workspace, unless the user explicitly wants a throwaway result.
 4. When a workflow involves follow-up generations or animations for the same subject, identify and reuse the canonical `asset_id` instead of generating from scratch again.
 5. If the agent loses track of generated asset IDs, recover them with `list_recent_assets(limit=...)` before failing.
@@ -24,11 +24,19 @@ Use this alongside the SpriteCook image or animation skill whenever SpriteCook M
 - Prefer SpriteCook MCP tools, presigned URLs, or a preconfigured local connector/helper that handles authentication outside the prompt.
 - If a raw API call is required and no authenticated helper exists, stop and ask the user to configure one.
 
+## Async Operations
+
+- Treat `generate_game_art`, `generate_tileset`, `remove_background`, `generate_character`, `generate_character_animations`, and `animate_game_art` as asynchronous operations.
+- Follow the returned `poll.tool` with its exact `poll.arguments`. Do not invent a polling endpoint or search arbitrary response fields.
+- Use `operation_id` as the generic identifier while retaining the returned `job_id` or `run_id` for the matching poll tool.
+- Pass `wait_seconds` only when the tool exposes it and an explicit bounded wait is useful; the normal default is immediate return.
+- On a terminal success, consume canonical `assets`. If the response contains `warning.code="asset_output_unavailable"`, execute its supplied `warning.recovery` tool call.
+
 ## Asset Library Tools
 
 - Use `spritecook-upload-assets` plus `create_asset_upload` and `finalize_asset_upload` when a local file path needs to become a SpriteCook asset before animation, editing, reference, or tileset-style reuse.
 - Use `import_asset(image=..., pixel=..., display_name=..., file_name=...)` only when the image is already a small data URL or raw base64 value that can be passed without printing it.
-- Use `remove_background(asset_id=...)` for owned SpriteCook assets that need a transparent cutout. Use `remove_background(image=...)` only when the user supplies local image data and does not need a reusable imported asset first.
+- Use `remove_background(asset_id=...)` for owned SpriteCook assets that need a transparent cutout. Use `remove_background(image=...)` only when the user supplies local image data and does not need a reusable imported asset first. Poll the returned job contract for the cleaned asset.
 - Use `update_asset_label(asset_id=..., label=...)` after generation, import, or cleanup when a clearer asset name will help the project manifest or future agent steps.
 - Do not tell the user to use the SpriteCook HTTP API or API keys for local image import when the SpriteCook MCP tools are available. Prefer the upload bridge for file paths.
 
@@ -82,6 +90,7 @@ Use this alongside the SpriteCook image or animation skill whenever SpriteCook M
 - For recent-asset recovery flows, prefer `list_recent_assets(limit=...)`.
 - Treat `sprite_url` as the single primary asset URL to inspect, save, or hand off to downstream tools.
 - Treat `spritesheet_url` as an optional secondary artifact. Use it only when present and only when you specifically need a spritesheet export.
-- For single-asset inspection flows, `get_asset_metadata(asset_id)` also exposes a primary `url` plus optional `spritesheet_url`.
+- For single-asset inspection flows, `get_asset_metadata(asset_id)` also exposes canonical `asset_id`, `sprite_url`, and optional `spritesheet_url` fields.
+- Treat `url`, `pixel_url`, and `raw_url` as compatibility aliases rather than the primary contract.
 - Avoid relying on low-level internal fields such as `_presigned_pixel_url` or `_presigned_url` in agent-facing workflows unless no higher-level field is available.
 - Avoid direct authenticated download endpoints in skill-driven workflows unless a helper handles auth out of band.

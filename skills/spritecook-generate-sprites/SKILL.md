@@ -15,7 +15,7 @@ For a complete UI screen or cohesive UI system, stop and use `spritecook-build-u
 
 ### `generate_game_art`
 
-Generate game art assets from a text prompt. Supports both pixel art and detailed/HD styles. Waits up to 90s for the result and returns download URLs.
+Generate game art assets from a text prompt. Supports both pixel art and detailed/HD styles. Returns a job immediately by default; follow the returned `poll.tool` and `poll.arguments` until the assets are ready. Pass `wait_seconds` only when an explicit bounded wait is useful.
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
@@ -34,10 +34,11 @@ Generate game art assets from a text prompt. Supports both pixel art and detaile
 | `mode` | string | "assets" | "assets", "texture", or "ui". Use `"ui"` only for one isolated UI asset; use `spritecook-build-ui-kits` for screens or systems. |
 | `resolution` | string | "1K" | "1K", "2K", or "4K" |
 | `quality` | string | "medium" | GPT-Image-2 quality tier: "low", "medium", or "high". Higher quality costs more credits. |
-| `colors` | string[] | null | Hex color palette, max 8 |
+| `colors` | string[] | null | Hex color palette, max 64 |
 | `style_asset_ids` | string[] | null | Owned asset IDs to use as ambient style guide images, max 10 |
 | `reference_asset_id` | string | null | Asset ID to use as one specific visual/context reference |
 | `edit_asset_id` | string | null | Asset ID to edit/modify with the new prompt |
+| `wait_seconds` | int | 0 | Optional bounded wait from 0-90 seconds before returning the polling contract |
 
 Referenced assets must belong to the user's account. `style_asset_ids` can be combined with either `reference_asset_id` or `edit_asset_id`. Do not combine `reference_asset_id` and `edit_asset_id`.
 
@@ -67,7 +68,7 @@ Perspectives and preset animations:
 
 ### `generate_character`
 
-Generate a base pixel-art character with SpriteCook's recommended character settings: 64x64, transparent background, 1K square, tight smart crop, and the perspective-specific character prompt rewrite. Returns a job response; when complete, the first generated asset is the `character_id`.
+Generate a base pixel-art character with SpriteCook's recommended character settings: 64x64, transparent background, 1K square, tight smart crop, and the perspective-specific character prompt rewrite. Returns a job immediately by default; when complete, the first generated asset is the `character_id`.
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
@@ -75,10 +76,11 @@ Generate a base pixel-art character with SpriteCook's recommended character sett
 | `perspective` | string (required) | - | `platformer`, `isometric`, or `topdown` |
 | `model` | string | null | Optional generation model. Call `list_generation_models` for current options and costs. |
 | `quality` | string | "medium" | GPT-Image-2 quality tier: "low", "medium", or "high" |
+| `wait_seconds` | int | 0 | Optional bounded wait from 0-90 seconds before returning the polling contract |
 
 ### `generate_character_animations`
 
-Generate preset and/or custom animations for a base character asset.
+Generate preset and/or custom animations for a base character asset. Returns a character-animation run immediately by default; follow the returned polling contract until canonical `assets` entries are ready.
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
@@ -87,6 +89,7 @@ Generate preset and/or custom animations for a base character asset.
 | `animation_ids` | string[] | perspective defaults | Preset ids from `list_character_workflows` |
 | `custom_animations` | object[] | null | Custom animations with `{ id, label, prompt, source_view, output_frames }` |
 | `bg_removal_provider` | string | "basic" | `basic` or `photoroom` |
+| `wait_seconds` | int | 0 | Optional bounded wait from 0-90 seconds before returning the polling contract |
 
 Custom animations use the custom prompt as the final animation prompt and skip preset prompt enhancement. `source_view` defaults to `front_idle`; if another source view needs prep, SpriteCook uses the matching workflow prep dependency for that perspective.
 
@@ -103,7 +106,14 @@ Example custom animation:
 
 ### `check_character_animation_run`
 
-Check a guided character animation run by id. Returns run status, item statuses, generated asset ids, prep state, failures, and credits.
+Check a guided character animation run by id. Returns run status, item statuses, canonical generated `assets`, prep state, failures, and credits.
+
+## Async Result Contract
+
+- Follow the returned `poll.tool` with its exact `poll.arguments`; use `check_job_status` for jobs and `check_character_animation_run` for character-animation runs.
+- Treat `operation_id` as the generic operation identifier while retaining `job_id` or `run_id` for the matching poll tool.
+- On success, use each asset's `asset_id` and `sprite_url`. Use `spritesheet_url` only when an animation also provides a spritesheet.
+- If a successful response contains `warning.code="asset_output_unavailable"`, execute the supplied `warning.recovery` tool call instead of searching arbitrary nested URL fields.
 
 ## Working Style
 

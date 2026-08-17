@@ -17,25 +17,26 @@ Call this when you need current supported perspectives, piece sets, tile sizes, 
 
 ### `generate_tileset`
 
-Generate a game-ready tileset. The tool waits up to 90 seconds and returns a job response with generated asset IDs and download URLs when complete.
+Generate a game-ready tileset. The tool returns a job immediately by default; follow the returned `poll.tool` and `poll.arguments` until canonical `assets` entries are ready.
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `prompt` | string | required | Terrain/material request, e.g. `mossy dungeon floor` |
 | `style_mode` | string | `pixel` | `pixel` or `detailed` |
-| `perspective` | string | `topdown` | `topdown` or `platformer` |
-| `piece_set` | string | registry default | `15-piece`, `17-piece-base`, or `autotile-16-set` |
+| `perspective` | string | `topdown` | `topdown`, `platformer`, or `isometric` |
+| `piece_set` | string | registry default | `15-piece`, `17-piece-base`, `autotile-16-set`, `isometric-3x5-32`, or `isometric-2x4-64` |
 | `tile_size` | int | registry default | Final tile size in pixels |
 | `elevation` | string | registry default | `no-elevation` or `minimal` where supported |
 | `edges` | string | `transparent` | `transparent` or `two_surfaces`; `two_surfaces` only works for 15-piece top-down |
 | `variations` | int | `1` | Number of variations, 1-4 |
 | `model` | string | null | Optional model override. Omit to use SpriteCook's tileset default |
-| `colors` | string[] | null | Optional hex color guidance, max 8 |
+| `colors` | string[] | null | Optional hex color guidance, max 64 |
 | `force_enabled` | bool | `false` | Force the output toward `force_colors` |
-| `force_colors` | string[] | null | Optional forced hex palette, max 8 |
+| `force_colors` | string[] | null | Optional forced hex palette, max 64 |
 | `reference_asset_id` | string | null | Existing tileset asset to use as source/reference; tileset settings are inherited |
 | `edit_asset_id` | string | null | Existing tileset asset to edit; tileset settings are inherited |
 | `style_asset_id` | string | null | Existing asset to use as visual style guide only |
+| `wait_seconds` | int | 0 | Optional bounded wait from 0-90 seconds before returning the polling contract |
 
 `reference_asset_id` and `edit_asset_id` are mutually exclusive. The referenced asset must belong to the SpriteCook account.
 
@@ -66,6 +67,8 @@ Generate a game-ready tileset. The tool waits up to 90 seconds and returns a job
 
 ## Output Handling
 
-- Save the returned `asset_id` in the project manifest or task notes.
-- Use the returned `pixel_url` for pixel-art tilesets when available.
-- Use the returned `raw_url` when the user asks for the original generated asset variant.
+- Follow the returned polling contract with `check_job_status` until the job reaches a terminal state.
+- Save each returned `asset_id` in the project manifest or task notes.
+- Use `sprite_url` as the canonical downloadable tileset image.
+- Treat `url`, `pixel_url`, and `raw_url` as compatibility aliases.
+- If a successful response contains `warning.code="asset_output_unavailable"`, execute the supplied `warning.recovery` tool call.

@@ -13,7 +13,7 @@ Use this skill for animation workflows. Pair it with `spritecook-workflow-essent
 
 ### `animate_game_art`
 
-Animate an existing SpriteCook asset into a short pixel-art or detailed animation.
+Animate an existing SpriteCook asset into a short pixel-art or detailed animation. The tool returns a job immediately; follow its `poll.tool` and `poll.arguments` instead of holding the request open.
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
@@ -73,4 +73,4 @@ If `auto_enhance_prompt=true`, simple prompts like `Idle`, `Attack`, or `Walk` a
 
 ### `check_job_status`
 
-Use `check_job_status(job_id=...)` for long-running animations instead of blocking when the client can continue work in the background.
+Use the `job_id` from `animate_game_art` with `check_job_status`. On success, use `asset_id` plus the canonical `sprite_url`; use `spritesheet_url` only when present. If the response reports `warning.code="asset_output_unavailable"`, execute the supplied `warning.recovery` tool call.
