@@ -11,6 +11,15 @@ Use this skill for still-image generation. Pair it with `spritecook-workflow-ess
 
 For a complete UI screen or cohesive UI system, stop and use `spritecook-build-ui-kits` instead. The UI-kit workflow creates one coherent concept before extracting reusable controls and states. Keep `generate_game_art(mode="ui")` for one isolated icon, badge, button, control, divider, frame, or decoration.
 
+## Pixel-Art Model Default
+
+- For new pixel-art sprites, use `generate_game_art` with `model="gemini-nano-banana-2.1"`, `pixel=true`, and `resolution="1K"` unless the user requests different settings. For a new base character, use `generate_character(model="gemini-nano-banana-2.1", ...)`.
+- Keep explicit user choices and saved preset models. For edits, preserve the source model inherited by the tool unless the user requests a model change.
+- Check `list_generation_models` for current availability and prices. Nano Banana 2.1 retains NB2's base 12 / 18 / 30 credits at 1K / 2K / 4K at release. Source resolution is separate from the requested pixel-art dimensions and does not guarantee an exact final canvas size.
+- For transparent sprites, continue using `background="transparent"`; SpriteCook removes the background after generation. NB2.1 does not produce native alpha transparency.
+- Keep the MCP tool's reference limits: `style_asset_ids` accepts at most 10 IDs, plus the supported reference or edit asset. The provider's 14-image total limit does not increase this tool's argument limit.
+- Complete UI kits follow `spritecook-build-ui-kits` and its own model default.
+
 ## Tool
 
 ### `generate_game_art`

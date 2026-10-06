@@ -67,10 +67,10 @@ Use this alongside the SpriteCook image or animation skill whenever SpriteCook M
 ## Defaults
 
 - Prefer `smart_crop_mode="tightest"` for the best default results. Use `"power_of_2"` only when the user explicitly asks for it.
-- Model guidance:
-  - `gemini-2.5-flash-image`: cheapest
-  - `gemini-3.1-flash-image`: recommended default for ordinary still-image generation
-  - `gemini-3-pro-image`: most expensive
+- Use Nano Banana 2.1 (`model="gemini-nano-banana-2.1"`) as the recommended default for new pixel-art sprites and base characters. Use `pixel=true` for `generate_game_art`; `generate_character` already uses pixel-art settings.
+- Preserve an explicit user model choice, a saved preset's model, or an edit workflow's inherited model. Nano Banana 2 (`gemini-3.1-flash-image`) is an older option, not the default for new pixel art.
+- Call `list_generation_models` for current availability, pixel-art support, resolution limits, and credit costs. If NB2.1 is unavailable, choose an available pixel-art model from that response; do not guess a replacement model ID.
+- NB2.1 supports 1K, 2K, and 4K source generation. Its base per-image price is 12 / 18 / 30 credits respectively, the same as NB2 at release; existing background-removal or workflow charges can still apply. Prefer 1K for ordinary pixel-art sprites, and verify current costs before a larger run.
 - Focused workflow defaults override this general guidance. In particular, UI kits default to `gpt-image-2` because their concept and sheet pipeline uses 2K output.
 
 ## Asset Manifest
