@@ -68,6 +68,7 @@ Other useful prompts:
   - `spritecook-workflow-essentials`
   - `spritecook-build-ui-kits`
   - `spritecook-generate-sprites`
+  - `spritecook-polish-sprites`
   - `spritecook-generate-tilesets`
   - `spritecook-animate-assets`
   - `spritecook-upload-assets`
@@ -105,4 +106,6 @@ MIT
 
 Bundled workflow skills come from [SpriteCook/skills](https://github.com/SpriteCook/skills). Update that repository first, then sync its committed skills into `skills/`. [skills-source.json](skills-source.json) records the exact bundled source revision.
 
-This version recommends Nano Banana 2.1 (`gemini-nano-banana-2.1`) for new pixel-art sprites and characters. Explicit model choices, presets, inherited edit models, and dedicated UI-kit defaults are preserved. No new environment variables or database migrations are required.
+This release adds guidance for generating multiple sprites in grids, preparing animation starting poses, and repairing outlines after background removal. It includes a local alpha-comparison helper and recommends GPT Image 2.5 Sunburst for UI-kit component sheets. Nano Banana 2.1 remains the recommended default for new pixel-art sprites and characters.
+
+Alpha-cutoff saving requires a connected server exposing `alpha_editing` metadata and `set_asset_alpha_cutoff`; Sunburst component sheets require the corresponding server update. Updating this plugin alone does not enable those backend features. The skills explain how to identify older servers. No new plugin environment variables or database migrations are required.

@@ -20,6 +20,45 @@ For a complete UI screen or cohesive UI system, stop and use `spritecook-build-u
 - Keep the MCP tool's reference limits: `style_asset_ids` accepts at most 10 IDs, plus the supported reference or edit asset. The provider's 14-image total limit does not increase this tool's argument limit.
 - Complete UI kits follow `spritecook-build-ui-kits` and its own model default.
 
+## Generating Multiple Assets in a Grid
+
+Generating assets together in a 3×3 or 4×4 grid is generally recommended when you need several related props, items, or decorations, or when you want to achieve smaller pixel art. This produces multiple assets in one generation, which can save the user credits compared with generating every asset separately, and helps keep the collection visually consistent.
+
+### Recommended Settings
+
+- Prefer Nano Banana 2.1 (`gemini-nano-banana-2.1`) or Nano Banana Pro (`gemini-3-pro-image`) for multi-object generations. Respect explicit user choices and saved presets, and check `list_generation_models` for current availability and costs.
+- Use `pixel=true` and `mode="assets"`.
+- Set the pixel-art width and height to the desired size of **each piece**. For example, when aiming for approximately 32×32 sprites, use `width=32` and `height=32`, rather than increasing them to 256×256 to represent the whole sheet. This works well as generation guidance; inspect the extracted sprites rather than assuming exact dimensions.
+- The `resolution` setting (`1K`, `2K`, or `4K`) controls source-image resolution separately. Start with `1K` for this workflow.
+- Describe the 3×3 or 4×4 grid in the prompt. `variations` controls the number of generated sheets, not the number of objects within a sheet.
+- Recommend Pro background removal for the best results when extracting individual sprites, especially around fine details and object edges. Account for its additional credit cost when estimating the batch. Select Pro where the workflow exposes that setting; do not invent a Pro parameter on `generate_game_art` or `remove_background` when the connected tool does not expose one. Background removal is a workflow setting, not an image-prompt instruction.
+
+### Prompting the Sheet
+
+- List the objects in row order, with one complete object per cell.
+- Request generous empty spacing, no overlaps, no labels, and no visible grid lines.
+- Specify consistent perspective, palette, lighting, outlines, and pixel scale across all objects.
+- Use existing assets as style references when matching a collection.
+
+Example prompt:
+
+> Nine medieval tavern props in a regular 3×3 grid. Row 1: barrel, wooden crate, sack. Row 2: mug, bottle, candle. Row 3: stool, bucket, cooking pot. One complete object centered in each cell, generous empty spacing, consistent three-quarter view and scale. Low-resolution pixel art suitable for approximately 32×32 sprites, readable silhouettes, limited warm palette, crisp edges, consistent upper-left lighting. No text, labels, grid lines, overlaps, or scene background.
+
+Pair this prompt with 32×32 pixel-art dimensions, 1K source resolution, Nano Banana 2.1 or Pro, and Pro background removal where available.
+
+### Slice First, Animate Afterward
+
+- Before slicing or animating, inspect outlines and transparency with `spritecook-polish-sprites`. If cleanup has removed edge pixels, compare the preserved alpha source locally and save the best cutoff before making derivatives.
+- Inspect the generated sheet before slicing; grid placement may be uneven.
+- If relying on regular grid boundaries, use `smart_crop=false` to preserve the outer layout, then verify the actual cell boundaries.
+- Slice into separate PNGs using available image-processing tools and check each sprite for complete boundaries, clean transparency, consistent scale, and readability at its intended size.
+- If resizing is needed, use nearest-neighbor sampling and recheck the result; prefer integer scaling where possible.
+- Keep the original sheet and record which crop produced each named asset.
+- If an extracted sprite needs animation, upload that individual PNG through `spritecook-upload-assets`, then animate its returned `asset_id` using `spritecook-animate-assets`.
+- Reuse the same extracted source asset for motions with a suitable starting pose. For a different starting state, prepare a referenced or edited pose first, following `spritecook-animate-assets`.
+
+Use individual generation when an asset needs dedicated control, and keep using the specialized character, tileset, and UI-kit workflows where relevant.
+
 ## Tool
 
 ### `generate_game_art`
@@ -100,7 +139,7 @@ Generate preset and/or custom animations for a base character asset. Returns a c
 | `bg_removal_provider` | string | "basic" | `basic` or `photoroom` |
 | `wait_seconds` | int | 0 | Optional bounded wait from 0-90 seconds before returning the polling contract |
 
-Custom animations use the custom prompt as the final animation prompt and skip preset prompt enhancement. `source_view` defaults to `front_idle`; if another source view needs prep, SpriteCook uses the matching workflow prep dependency for that perspective.
+Custom animations use the custom prompt as the final animation prompt and skip preset prompt enhancement. `source_view` defaults to `front_idle`; if another source view needs prep, SpriteCook uses the matching workflow prep dependency for that perspective. A `source_view` selects a supported workflow input, not an arbitrary new state such as curled-up sleep. For a custom state that needs a different starting pose, prepare the still with `generate_game_art` first, then use `animate_game_art` on that prepared asset.
 
 Example custom animation:
 
@@ -126,13 +165,14 @@ Check a guided character animation run by id. Returns run status, item statuses,
 
 ## Working Style
 
+- After generation, inspect the result at native size and nearest-neighbor zoom. Use `spritecook-polish-sprites` for broken outlines, missing edge pixels, halos, or background debris before delivery or reuse; keep clean results unchanged.
 - Be specific about subject, pose, camera/view angle, and key materials.
 - Call `list_generation_models` when current model names, pixel-art support, quality options, or credit costs matter.
 - When the user asks to use a saved preset, use `list_presets` and `get_preset_settings` first, then map the returned prompt, style, model, size, color, and reference guidance into `generate_game_art`.
 - Use `list_character_workflows`, `generate_character`, and `generate_character_animations` when the user wants a directly usable animated character set.
 - Route menus, HUDs, inventories, dialogs, settings screens, overlays, and other complete UI compositions to `spritecook-build-ui-kits`.
 - Default to pixel art unless the user asks for HD, detailed, smooth, realistic, or high-res output.
-- When the user wants the same character or item in multiple outputs, generate one canonical still asset first and reuse that asset ID.
+- When the user wants the same character or item in multiple outputs, establish one canonical design and reuse it as the source or reference. For animation, prepare a different starting pose when needed, following `spritecook-animate-assets`.
 - Use `style_asset_ids` for follow-up generations that should keep the same visual style, especially when a preset returns `settings.reference.styleAssetIds`.
 - Use `reference_asset_id` when the prompt depends on one specific visual/context reference asset.
 - Use `edit_asset_id` when directly modifying one existing SpriteCook asset.
@@ -141,7 +181,7 @@ Check a guided character animation run by id. Returns run status, item statuses,
 
 ## Consistency Rules
 
-- For a motion set like idle, walk, attack, or hurt: generate the base character once, then animate that exact `asset_id` separately for each motion.
+- For a motion set, establish the base character once. Animate the same `asset_id` when its starting pose fits; otherwise create a referenced or edited still in the required starting pose, inspect it, and animate that new asset. For example, prepare a sleeping still before generating a sleeping loop.
 - For asset variations that should stay recognizably the same design, prefer `edit_asset_id` for direct modification or `style_asset_ids` for style guidance over a brand-new unreferenced generation.
 - Only skip a reference when the user explicitly wants different designs to explore.
 

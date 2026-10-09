@@ -18,12 +18,12 @@ Use this skill for complete screens and cohesive UI systems. Pair it with `sprit
 ## Default Workflow
 
 1. Confirm the UI-kit tools are present, then call `get_credit_balance` before starting the multi-image workflow. If the tools are missing, refresh or reconnect the SpriteCook MCP integration; do not fall back to independently generating a full screen with `mode="ui"`.
-2. Create the kit with `create_ui_kit` and preserve its `id`. Keep the default `model="gpt-image-2"` unless the user specifically requests Gemini and their account supports 2K Gemini generation.
+2. Create the kit with `create_ui_kit` and preserve its `id`. The concept model defaults to GPT Image 2.5 Flare (`gpt-image-2.5-flare`); preserve an explicit user choice. Component sheets use GPT Image 2.5 Sunburst (`gpt-image-2.5-sunburst`) independently of the concept model.
 3. Establish the concept:
    - If the user or agent already has a suitable owned SpriteCook asset ID, pass it as `concept_asset_id`. This selects it immediately and skips concept generation.
    - If the concept is a local file, use `spritecook-upload-assets` first, then pass the returned ID as `concept_asset_id`.
    - Otherwise call `generate_ui_kit_concepts`, follow progress with `get_ui_kit`, inspect the returned concept assets, and call `select_ui_kit_concept` with the strongest option.
-4. Call `generate_ui_kit_component_sheets`. Omit `sheet_count` to let SpriteCook plan one to three sheets from the concept.
+4. Call `generate_ui_kit_component_sheets`. GPT Image 2.5 Sunburst (`gpt-image-2.5-sunburst`) is the recommended component-sheet model and is selected by the server for new sheets, edits, and supplements. This tool has no `model` argument; changing the kit's concept model does not change its sheet model. Omit `sheet_count` to let SpriteCook plan one to three sheets from the concept.
 5. Follow progress with `get_ui_kit` until `status` is `sheet_review` and component-sheet assets are present.
 6. Call `extract_ui_kit_components` without `sheet_asset_ids` to process every sheet from the selected or latest successful attempt.
 7. Inspect `quality_summary` and the returned component draft programmatically. Confirm names are distinct, each rectangle represents one useful element, state families are sensible, and scalable components are marked correctly. If `requires_review` is true, resolve every relevant warning before finalizing.
@@ -36,7 +36,9 @@ Continue through extraction and finalization by default. The returned `review_ur
 
 Give `create_ui_kit` the screen intent, platform, aspect ratio, game description, visual direction, and screen-specific instructions. Use `style_asset_ids` only for owned images that define the broader art direction.
 
-For UI kits, use `gpt-image-2` by default. The accepted canonical alternatives are `gemini-3.1-flash-image` and `gemini-3-pro-image`, but UI-kit concepts are 2K and those Gemini models require a plan that independently allows 2K generation. If the server returns `ui_kit_model_resolution_limit`, retry by creating or updating the kit with `model="gpt-image-2"`; no generation credits were spent on that validation error. Do not use legacy `-preview` model IDs.
+Keep concept generation and component-sheet generation separate. Concepts default to GPT Image 2.5 Flare (`gpt-image-2.5-flare`); GPT Image 2.5 Sunburst (`gpt-image-2.5-sunburst`) is recommended for component sheets. Check `list_generation_models` for current availability and costs. Gemini concepts require a plan that independently allows 2K generation. If the server returns `ui_kit_model_resolution_limit`, follow its `recommended_model`; no generation credits were spent on that validation error. Do not use legacy `-preview` model IDs.
+
+Older servers may still force component sheets to `gpt-image-2`. Inspect the returned sheet asset's model with `get_asset_metadata` when verifying the workflow. If it differs, report that the connected server needs updating; do not claim that setting the concept model switches the component-sheet model. Sunburst reference-image charges apply to the concept or sheet references; use the current kit cost estimates, which account for native transparency without a separate background-removal charge.
 
 Use `state_mode="visible-only"` when the user needs only what appears in the concept. Use `state_mode="complete-states"` for production control families that should include normal, hover/focus, pressed, disabled, checked, or selected variants.
 
