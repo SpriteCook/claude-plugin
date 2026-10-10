@@ -9,14 +9,24 @@ Use this alongside the SpriteCook image or animation skill whenever SpriteCook M
 
 **Requires:** SpriteCook MCP server connected to your editor. Set up with `npx spritecook-mcp setup` or see [spritecook.ai](https://spritecook.ai).
 
+SpriteCook skills version: 2026.10.11
+
 ## Preflight Checklist
 
-1. Check credits first with `get_credit_balance` before starting a batch or multi-asset workflow.
+1. Call `get_credit_balance` once when you start SpriteCook work, and again before a batch or multi-asset workflow. It reports credits, the connected account, and the latest skills version (see Staying Up to Date).
 2. Use each asset's `sprite_url` as the canonical downloadable image URL. Use `spritesheet_url` only when it is present and specifically needed.
 3. Save important `asset_id` values in a local manifest whenever there is a writable workspace, unless the user explicitly wants a throwaway result.
 4. When a workflow involves follow-up generations or animations for the same subject, reuse the canonical design. For animation, reuse its `asset_id` when the starting pose fits; otherwise prepare a referenced or edited pose first, as explained in `spritecook-animate-assets`.
 5. If the agent loses track of generated asset IDs, recover them with `list_recent_assets(limit=...)` before failing.
 6. `get_credit_balance` also returns `account_handle` and a masked `account_email`. Use them to confirm which SpriteCook account the connection acts as, especially before saving presets or when an asset ID returns a no-access error (it may belong to a different account).
+
+## Staying Up to Date
+
+SpriteCook works best on the newest plugin version, because each release updates these instructions and the defaults that produce better assets.
+
+- `get_credit_balance` returns `latest_skills_version`. Compare it with the skills version at the top of this file. If the field is missing, skip this check.
+- If `latest_skills_version` is newer, tell the user once per session that a SpriteCook plugin update is available and offer to help them update it for their editor. Then continue the task.
+- Do not block work on the update, and do not install or change the plugin without the user's go-ahead.
 
 ## Credential Safety
 

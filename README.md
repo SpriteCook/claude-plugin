@@ -43,6 +43,10 @@ Install the plugin locally from inside the app:
 
 Use the path to your local checkout. Restart the app once, then complete the SpriteCook sign-in flow the first time you call a SpriteCook tool.
 
+### Updates
+
+Claude doesn't auto-update plugins from third-party marketplaces unless you turn it on. If you installed SpriteCook from the marketplace, run `/plugin`, open **Marketplaces**, select **spritecook** and choose **Enable auto-update**. To update right away, run `claude plugin update spritecook@spritecook`, then `/reload-plugins`.
+
 ## Try It
 
 Ask Claude:
@@ -106,6 +110,4 @@ MIT
 
 Bundled workflow skills come from [SpriteCook/skills](https://github.com/SpriteCook/skills). Update that repository first, then sync its committed skills into `skills/`. [skills-source.json](skills-source.json) records the exact bundled source revision.
 
-This release adds guidance for generating multiple sprites in grids, preparing animation starting poses, and repairing outlines after background removal. It includes a local alpha-comparison helper and recommends GPT Image 2.5 Sunburst for UI-kit component sheets. Nano Banana 2.1 remains the recommended default for new pixel-art sprites and characters.
-
-Alpha-cutoff saving requires a connected server exposing `alpha_editing` metadata and `set_asset_alpha_cutoff`; Sunburst component sheets require the corresponding server update. Updating this plugin alone does not enable those backend features. The skills explain how to identify older servers. No new plugin environment variables or database migrations are required.
+This release adds a skills version stamp. Agents compare it with the latest version that `get_credit_balance` reports and tell you when a newer SpriteCook plugin is available. Servers without `latest_skills_version` skip the check. No new plugin environment variables or database migrations are required.

@@ -1,6 +1,6 @@
 {
   "name": "spritecook",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "Generate sprites, cohesive UI kits, textures, and short animations in Claude with SpriteCook's guided game-art workflows.",
   "author": {
     "name": "SpriteCook",
