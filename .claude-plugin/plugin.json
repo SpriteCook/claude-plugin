@@ -10,6 +10,10 @@
   "homepage": "https://spritecook.ai",
   "repository": "https://github.com/SpriteCook/claude-plugin",
   "license": "MIT",
+  "icon": "./assets/spritecook-logo.png",
+  "documentationUrl": "https://spritecook.ai/claude",
+  "privacyPolicyUrl": "https://spritecook.ai/privacy",
+  "termsOfServiceUrl": "https://spritecook.ai/terms",
   "keywords": [
     "spritecook",
     "game-art",
