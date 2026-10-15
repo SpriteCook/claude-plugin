@@ -110,4 +110,4 @@ MIT
 
 Bundled workflow skills come from [SpriteCook/skills](https://github.com/SpriteCook/skills). Update that repository first, then sync its committed skills into `skills/`. [skills-source.json](skills-source.json) records the exact bundled source revision.
 
-This release adds a skills version stamp. Agents compare it with the latest version that `get_credit_balance` reports and tell you when a newer SpriteCook plugin is available. Servers without `latest_skills_version` skip the check. No new plugin environment variables or database migrations are required.
+Bundled skills recommend Gemini image models for pixel art and limit uploads and recovery to the requested SpriteCook task. Version checks run when you ask about updates or compatibility. No new plugin environment variables or database migrations are required.
