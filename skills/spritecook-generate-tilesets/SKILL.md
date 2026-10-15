@@ -7,7 +7,7 @@ description: "Tileset generation guide for SpriteCook. Use with spritecook-workf
 
 Use this skill for SpriteCook tileset generation. Pair it with `spritecook-workflow-essentials` for credits, manifests, safe downloads, and asset tracking.
 
-**Requires:** SpriteCook MCP server connected to your editor. Set up with `npx spritecook-mcp setup` or see [spritecook.ai](https://spritecook.ai).
+**Requires:** A connected SpriteCook MCP server. If disconnected, explain that connection is needed and use the host's native connection flow when authorized. Do not install software or change authentication settings as part of an art task.
 
 ## Tools
 
