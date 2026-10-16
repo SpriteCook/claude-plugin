@@ -25,7 +25,7 @@ Animate an existing SpriteCook asset into a short pixel-art or detailed animatio
 | `edge_margin` | int | 6 | Adds spacing on all sides before animation framing |
 | `pixel` | bool | null | Optional mode override. If omitted, SpriteCook infers the mode from the asset |
 | `model` | string | mode default | `pixel-engine-v1.1`, `frame-engine-v1.1`, or `pixel-engine-v1.5`. Omit for the v1.1 default |
-| `output_frames` | int | 8 | `pixel-engine-v1.1`: even counts 2-16. `frame-engine-v1.1`: even counts 2-24. `pixel-engine-v1.5`: any whole number 3-16 |
+| `output_frames` | int | 8 | v1.1 uses even counts (pixel 2-16, detailed 2-24); v1.5 accepts 3-16 whole-number frames |
 | `output_format` | string | "webp" | "webp", "gif", or "spritesheet" |
 | `negative_prompt` | string | null | Optional motion/content exclusions. Not supported by `pixel-engine-v1.5`; do not send it there |
 | `matte_color` | string | "#808080" | Hex matte color used before processing transparency |
@@ -75,7 +75,7 @@ The upload/import step is where the source image enters SpriteCook. It is not th
 
 ## Source Rules
 
-- Pixel animation is the correct choice for small sources: up to `256x256` on `pixel-engine-v1.1`, up to `320x320` on `pixel-engine-v1.5`.
+- Pixel animation is the correct choice for small sources: v1.1 pixel animation accepts assets up to `256x256`; v1.5 pixel animation accepts assets up to `320x320`.
 - Detailed animation is the correct choice for assets between `256x256` and `2048x2048`.
 - Do not force a sub-256 source into detailed mode.
 - Source aspect ratio must be between 1:2 and 2:1.
