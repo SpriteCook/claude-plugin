@@ -41,7 +41,7 @@ For a full-kit request, continue through extraction and finalization when qualit
 
 ## Creating the Kit
 
-Give `create_ui_kit` the screen intent, platform, aspect ratio, game description, visual direction, and screen-specific instructions. Use `style_asset_ids` only for owned images that define the broader art direction.
+Give `create_ui_kit` the screen intent, platform, aspect ratio, game description, visual direction, and screen-specific instructions. Use `style_asset_ids` only for owned images that define the broader art direction. `create_ui_kit` has no `project_id` and files the kit in its own project; move finished assets with `assign_assets_to_project` when they belong to the user's project.
 
 Keep concept generation and component-sheet generation separate. Concepts default to GPT Image 2.5 Flare (`gpt-image-2.5-flare`); GPT Image 2.5 Sunburst (`gpt-image-2.5-sunburst`) is recommended for component sheets. Check `list_generation_models` and the kit estimates before generating, and stay within the user's budget. Gemini concepts require account access to 2K generation. For `ui_kit_model_resolution_limit`, treat `recommended_model` as a suggestion: check it against the available model catalog and the user's constraints. Explain the limitation instead of silently overriding an explicit model choice. Do not use legacy `-preview` model IDs.
 
@@ -62,7 +62,7 @@ An existing `concept_asset_id` is the specific screen concept being decomposed. 
 - Refine one component sheet with `edit_source_asset_id` and `edit_notes`.
 - Request `high_resolution=true` only when the user's plan supports 4K and larger source components materially help.
 
-Concept and sheet tools return job IDs immediately. Do not treat submission as completion; track those jobs through `get_ui_kit`. Check existing job state before retrying. Do not start extra concept batches, regenerate accepted sheets, or repeat a generation to recover a missing response without authorization for that additional work.
+Concept and sheet tools return job IDs immediately unless their schema lists a bounded `wait_seconds`. Concepts usually take 70-90 seconds, so wait about a minute before the first `get_ui_kit` check. Costs show in each response's `credits_used` (for example 22 credits per concept or sheet at standard resolution); check the kit estimates before promising the user a total. Do not treat submission as completion; track those jobs through `get_ui_kit`. Check existing job state before retrying. Do not start extra concept batches, regenerate accepted sheets, or repeat a generation to recover a missing response without authorization for that additional work.
 
 ## Extraction and 9-Slice Rules
 
@@ -72,6 +72,7 @@ Always audit the returned `quality_summary` before finalization:
 
 - A sheet with `at_component_limit=true` reached the 100-detection ceiling. Check whether small components were omitted or merged.
 - Inspect `possible_merged` and split an obvious multi-object rectangle into separate corrected rectangles, or omit it when its contents already exist separately.
+- Do not rely on `possible_merged` alone. Stacked button states and icon columns can come back as one tall rectangle while `possible_merged_count` is `0`. Check every rectangle that is much taller or wider than others of its type, look for near-empty rows or columns of alpha inside it, and split along those gaps into separate states.
 - Fix duplicate or vague names and correct controls misclassified as panels or decorations.
 - Give obvious interaction families one stable `group` and distinct `state` values such as normal, hover, pressed, disabled, on/off, selected/unselected, or checked/unchecked.
 - Treat fallback classification as a reason to review all names and types.
@@ -79,7 +80,11 @@ Always audit the returned `quality_summary` before finalization:
 
 Automatic extraction initializes all 9-slice borders to zero. Zero is correct for fixed-size icons and decorations. For scalable panels, buttons, inputs, tooltips, tracks, and frames, set non-zero `left`, `top`, `right`, and `bottom` borders only when the protected edges can be identified confidently. Use the optional browser review for precise visual placement.
 
-Finalization returns reusable private component assets plus a manifest containing type, state group, state, dimensions, scalability, and 9-slice metadata. Unity, Godot, and web archive downloads remain available from the browser review page; MCP supplies the assets and manifest directly.
+Finalization returns reusable private component assets plus a manifest containing type, state group, state, dimensions, scalability, and 9-slice metadata. Unity, Godot, and web archive downloads remain available from the browser review page; MCP supplies the assets and manifest directly. For a large kit the `finalize_ui_kit` response can exceed a client's tool output limit; if the host saves it to a file, read the asset IDs and manifest from that file instead of calling finalize again.
+
+Component parts are detailed images, even when the concept looks like pixel art; SpriteCook does not snap them to a pixel grid. For a pixel-art game, use the parts at their native resolution rather than shrinking them onto the game's pixel grid, which makes them soft.
+
+Text in the concept, such as a game title on a title plate, usually comes back as a blank plate in the component sheet. Add the lettering afterward with `generate_game_art(edit_asset_id=<plate>, ...)` and the concept as a style reference.
 
 ## Recovery
 

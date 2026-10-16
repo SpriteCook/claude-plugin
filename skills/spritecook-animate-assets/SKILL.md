@@ -24,12 +24,15 @@ Animate an existing SpriteCook asset into a short pixel-art or detailed animatio
 | `auto_enhance_prompt` | bool | true | Inspect the source asset and expand short prompts into a fuller animation prompt |
 | `edge_margin` | int | 6 | Adds spacing on all sides before animation framing |
 | `pixel` | bool | null | Optional mode override. If omitted, SpriteCook infers the mode from the asset |
-| `output_frames` | int | 8 | Even frame count. Pixel supports 2-16, detailed supports 2-24 |
+| `model` | string | mode default | `pixel-engine-v1.1`, `frame-engine-v1.1`, or `pixel-engine-v1.5`. Omit for the v1.1 default |
+| `output_frames` | int | 8 | `pixel-engine-v1.1`: even counts 2-16. `frame-engine-v1.1`: even counts 2-24. `pixel-engine-v1.5`: any whole number 3-16 |
 | `output_format` | string | "webp" | "webp", "gif", or "spritesheet" |
-| `negative_prompt` | string | null | Optional motion/content exclusions |
+| `negative_prompt` | string | null | Optional motion/content exclusions. Not supported by `pixel-engine-v1.5`; do not send it there |
 | `matte_color` | string | "#808080" | Hex matte color used before processing transparency |
-| `removebg` | string | "Basic" | "None", "Basic", or "Pro" |
-| `colors` | int | 24 | Pixel palette size. Only valid when `pixel=true` |
+| `removebg` | string | "Basic" | "None", "Basic", or "Pro". Pro adds a per-frame cost |
+| `colors` | int | 24 | Pixel palette size, enforced on the output. Only valid when `pixel=true` |
+
+Animations take about 1-5 minutes. Pass a bounded `wait_seconds` only if the tool's schema lists it; otherwise space `check_job_status` calls accordingly. `animate_game_art` takes no `project_id`; move results with `assign_assets_to_project` when needed.
 
 ## Prepare the Starting Frame
 
@@ -72,10 +75,44 @@ The upload/import step is where the source image enters SpriteCook. It is not th
 
 ## Source Rules
 
-- Pixel animation is the correct choice for assets up to `256x256`.
+- Pixel animation is the correct choice for small sources: up to `256x256` on `pixel-engine-v1.1`, up to `320x320` on `pixel-engine-v1.5`.
 - Detailed animation is the correct choice for assets between `256x256` and `2048x2048`.
 - Do not force a sub-256 source into detailed mode.
-- Keep `edge_margin=6` by default. It helps prevent pixel art from crowding the canvas edge.
+- Source aspect ratio must be between 1:2 and 2:1.
+- Keep `edge_margin=6` by default. It helps prevent pixel art from crowding the canvas edge. It is a percentage, so very small sprites gain only a pixel or two; raise it for motions that reach outward, such as a lid opening or a wide swing.
+
+## Choosing an Engine
+
+- `pixel-engine-v1.1` (default) suits loops, walk cycles, and idles.
+- `pixel-engine-v1.5` suits precise or unusual motion and isolated subjects. It also tends to give calmer, more faithful motion on a single transparent character or prop.
+- Results vary per subject. When quality matters, try both engines on the same still and keep the better one.
+- Guided character runs (`generate_character_animations`) use v1.1 only. For v1.5, animate each motion with `animate_game_art` on the same still.
+
+## Output Canvas
+
+- The output frame is usually square and padded. A non-square source is centered in a square frame (a 180x320 source returns 320x320 frames), and small sprites can be rescaled slightly. The response does not report the offset.
+- To put an animation back in a scene or line it up with its still, match frame 0 against the source locally to find the offset, and check the scale.
+- Frame sizes differ between jobs. For a set that must share one ground line, compute a shared frame box locally and re-place every frame.
+- Frame counts can occasionally differ by one from `output_frames`; read `frame_count` from the result metadata before assuming a loop length.
+- With `output_format="spritesheet"`, `sprite_url` is still the animated WebP; the PNG strip is `spritesheet_url`.
+
+## Quality Checks
+
+- Clean the still before animating: stray pixels on outlines, background trapped between parts, and noise get redrawn into every frame. Use `spritecook-polish-sprites` first.
+- Below about 32 px, outlines can soften and small features such as eyes can drift between frames. Keep faces simple at that size and inspect every frame.
+- Idles can flicker: isolated pixels change for one frame and change back. A calm prompt with `auto_enhance_prompt=false` reduces overall motion. Fix the remaining one-frame flips locally by restoring a pixel when the frames before and after it agree.
+- Say what must stay still ("feet stay planted", "the face does not change") and check that it held; the engine does not always respect it.
+- Check for grey or off-color specks near glows and at the feet, and for loops that don't close (compare the last frame with the first).
+
+## Animating Part of a Scene
+
+Animating a full scene redraws the whole frame: static areas such as sky and stone shift between frames and the loop rarely closes. Animate the moving part on its own instead:
+
+1. Edit the scene with `generate_game_art(edit_asset_id=<scene>, prompt="Remove the X ...")` to get a clean background plate.
+2. Cut X out locally as the difference between the original and the plate, upload it, and animate that asset alone.
+3. Composite the frames back onto the plate at the matched offset.
+
+For effects that belong to the background, such as a waterfall, animate a crop of the plate with `removebg="None"` and `edge_margin=0`, then blend the moving region back with a motion mask.
 
 ## Prompt Writing
 

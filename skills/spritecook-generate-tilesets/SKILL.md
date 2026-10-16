@@ -33,6 +33,7 @@ Generate a game-ready tileset. The tool returns a job immediately by default; fo
 | `colors` | string[] | null | Optional hex color guidance, max 64 |
 | `force_enabled` | bool | `false` | Force the output toward `force_colors` |
 | `force_colors` | string[] | null | Optional forced hex palette, max 64 |
+| `project_id` | string | null | Owned project to place the tileset in |
 | `reference_asset_id` | string | null | Existing tileset asset to use as source/reference; tileset settings are inherited |
 | `edit_asset_id` | string | null | Existing tileset asset to edit; tileset settings are inherited |
 | `style_asset_id` | string | null | Existing asset to use as visual style guide only |
@@ -57,6 +58,8 @@ Generate a game-ready tileset. The tool returns a job immediately by default; fo
 - Use `edit_asset_id` when the user wants a direct change to an existing tileset.
 - Use `style_asset_id` as a style guide image when the image should affect only visual style, palette, proportions, and rendering, not tileset layout. The prompt does not need to repeat that the image is a style guide unless the user asks to emphasize a specific detail.
 - When referencing or editing a tileset, do not change `style_mode`, `perspective`, `piece_set`, `tile_size`, or `elevation`; SpriteCook inherits and locks those settings.
+- `edges` is not inherited. When the source is a `two_surfaces` set, pass `edges="two_surfaces"` again on every edit or reference generation; otherwise the request falls back to `transparent`.
+- Edits and reference generations skip the layout guide grid that fresh generations use, so they fail or produce pieces that don't tile more often. An edit can fail with `tileset_unusable`; the credits are refunded. When an edit fails twice, generate from the set as `reference_asset_id` or start fresh with a clearer prompt instead of retrying the same edit.
 
 ## Prompting
 
@@ -67,7 +70,9 @@ Generate a game-ready tileset. The tool returns a job immediately by default; fo
 
 ## Output Handling
 
-- Follow the returned polling contract with `check_job_status` until the job reaches a terminal state.
+- Pass `wait_seconds=90` on `generate_tileset`; most tilesets finish inside it, so polling is rarely needed. Otherwise follow the returned polling contract with `check_job_status` until the job reaches a terminal state.
+- Check every variation before using it. About one in three can have a full interior tile that doesn't wrap (opposite edges differ in brightness) or pieces that don't meet cleanly, and the response doesn't flag it. Compare the full tile's left and right edges and its top and bottom edges, and paint a small test map with `spritecook-use-dual-grid-tilesets` for 15-piece sets. A full tile that doesn't wrap shows as a checkerboard over large areas. Pick a clean variation or regenerate.
+- 15-piece sets keep the grid's stepped silhouette on diagonals. Shorelines get a soft edge, but a diagonal coast still reads as steps.
 - Save each returned `asset_id` in the project manifest or task notes.
 - Use `sprite_url` as the canonical downloadable tileset image.
 - Treat `url`, `pixel_url`, and `raw_url` as compatibility aliases.

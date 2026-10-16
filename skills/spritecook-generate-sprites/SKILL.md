@@ -17,7 +17,7 @@ For a complete UI screen or cohesive UI system, stop and use `spritecook-build-u
 - Keep explicit user choices and saved preset models. For edits, preserve the source model inherited by the tool unless the user requests a model change.
 - Check `list_generation_models` for current availability and prices. Nano Banana 2.1 retains NB2's base 12 / 18 / 30 credits at 1K / 2K / 4K at release. Source resolution is separate from the requested pixel-art dimensions and does not guarantee an exact final canvas size.
 - For transparent sprites, continue using `background="transparent"`; SpriteCook removes the background after generation. NB2.1 does not produce native alpha transparency.
-- Keep the MCP tool's reference limits: `style_asset_ids` accepts at most 10 IDs, plus the supported reference or edit asset. The provider's 14-image total limit does not increase this tool's argument limit.
+- Keep the reference limits: `generate_game_art` accepts up to 14 reference images in total across `style_asset_ids` plus a `reference_asset_id` or `edit_asset_id`. The selected model's own limit can be lower; `list_generation_models` reports it.
 - Complete UI kits follow `spritecook-build-ui-kits` and its own model default.
 
 ## Generating Multiple Assets in a Grid
@@ -52,6 +52,8 @@ Pair this prompt with 32×32 pixel-art dimensions, 1K source resolution, Nano Ba
 - Inspect the generated sheet before slicing; grid placement may be uneven.
 - If relying on regular grid boundaries, use `smart_crop=false` to preserve the outer layout, then verify the actual cell boundaries.
 - Slice into separate PNGs using available image-processing tools and check each sprite for complete boundaries, clean transparency, consistent scale, and readability at its intended size.
+- `auto_slice_asset` splits an owned sheet into owned assets by connected alpha. It works well for compact objects (raise `merge_distance` slightly for sprites with small gaps). Objects with detached parts, such as separate wing tips or sparkles, can split into extra pieces; slice those by grid cell locally instead.
+- Cells can come back at different sizes even within one sheet. Normalize the set to one shared canvas locally when sizes must match.
 - If resizing is needed, use nearest-neighbor sampling and recheck the result; prefer integer scaling where possible.
 - Keep the original sheet and record which crop produced each named asset.
 - If an extracted sprite needs animation, upload that individual PNG through `spritecook-upload-assets`, then animate its returned `asset_id` using `spritecook-animate-assets`.
@@ -68,8 +70,8 @@ Generate game art assets from a text prompt. Supports both pixel art and detaile
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `prompt` | string (required) | - | What to generate. Be specific about subject, pose, and view angle |
-| `width` | int | 64 | Width in pixels (16-512) |
-| `height` | int | 64 | Height in pixels (16-512) |
+| `width` | int | 64 | Width hint in pixels (16-512); see Output Size below |
+| `height` | int | 64 | Height hint in pixels (16-512); see Output Size below |
 | `variations` | int | 1 | Number of variations (1-4) |
 | `pixel` | bool | true | True for pixel art, false for detailed/HD art |
 | `bg_mode` | string | "transparent" | "transparent", "white", or "include" |
@@ -82,8 +84,9 @@ Generate game art assets from a text prompt. Supports both pixel art and detaile
 | `mode` | string | "assets" | "assets", "texture", or "ui". Use `"ui"` only for one isolated UI asset; use `spritecook-build-ui-kits` for screens or systems. |
 | `resolution` | string | "1K" | "1K", "2K", or "4K" |
 | `quality` | string | "medium" | GPT-Image-2 quality tier: "low", "medium", or "high". Higher quality costs more credits. |
-| `colors` | string[] | null | Hex color palette, max 64 |
-| `style_asset_ids` | string[] | null | Owned asset IDs to use as ambient style guide images, max 10 |
+| `colors` | string[] | null | Hex palette guidance, max 64. Guides the colors; the output is not an indexed palette |
+| `style_asset_ids` | string[] | null | Owned asset IDs to use as ambient style guide images; up to 14 references in total, model limits apply |
+| `project_id` | string | null | Owned project to place the new assets in |
 | `reference_asset_id` | string | null | Asset ID to use as one specific visual/context reference |
 | `edit_asset_id` | string | null | Asset ID to edit/modify with the new prompt |
 | `wait_seconds` | int | 0 | Optional bounded wait from 0-90 seconds before returning the polling contract |
@@ -97,6 +100,42 @@ If the user provides local image file paths for these references, use `spritecoo
 - Use `style_asset_ids` for style guide images: ambient style, palette, proportions, rendering, and art-direction context. This is the normal choice when generating a new related asset that should match an existing collection, such as giving three existing buildings as style guides before asking for a new building type. SpriteCook already treats these images as style references; mention them in the prompt only when the user wants a specific trait called out.
 - Use `reference_asset_id` when one specific asset is the source or context for the prompt, such as `make a building in a similar style to this one`, `give me just the door sprite`, or `use this character as the visual reference`.
 - Use `edit_asset_id` when the user wants a direct modification of one existing asset, such as `make this roof red`, `remove the sign`, or `change the helmet color`.
+- A reference also carries over its flaws, such as noise or stray pixels. Clean a reference before reusing it.
+- `reference_asset_id` copies the reference's pixel size closely, and several variations of a close reference can return near copies of it. Use `variations=1` or `2` for a reference redraw and say in the prompt what must change.
+
+## Output Size
+
+`width` and `height` are hints (`size_behavior: "hint"` in `resolved_parameters`), not a hard canvas size. In pixel mode the final canvas follows the detected pixel grid and the content crop, so it can differ a lot from the request. Variations from one job can also come back at different sizes.
+
+- Read `resolved_parameters.output_dimensions` or each asset's `width`/`height` before planning a layout. Do not assume the requested size.
+- Small requests usually land larger: a 16-48 px request for a detailed subject commonly returns 40-90 px. Describe the size in the prompt too, for example "tiny low-resolution sprite, about 32 pixels tall".
+- `aspect_ratio` and `smart_crop` do not guarantee the canvas shape. A transparent subject can come back square with empty bands; trim locally when the exact box matters.
+- Edits can change the size. A model switch on `edit_asset_id` can put a 44 px sprite on a different grid. Keep the source's model for small pixel edits and check the size afterward.
+- `generate_character` aims for about 64 px but often returns 56-170 px canvases depending on model and subject.
+
+To get a sprite at a specific small size:
+
+1. Generate at the model's natural size and pick the best design.
+2. Downscale it locally with nearest-neighbor to the target size (for example by half), then upload it through `spritecook-upload-assets`.
+3. Call `generate_game_art` with the upload as `reference_asset_id`, `variations=1` or `2`, and a prompt like "a clean redraw of this exact low-resolution sprite at the same chunky pixel size, same design and palette". The redraw keeps the reference's pixel size and cleans up the downscale.
+
+To match the pixel scale of an existing collection, pass that collection as `style_asset_ids`. Style references carry pixel density well; a new prop or creature matches the established scale far more reliably than a size hint alone.
+
+## Proven Recipes
+
+**Consistent families.** For a set of icons, badges, tiers, or items, generate the whole set as one 3×3 or 4×4 sheet in one call. One sheet gives the same size, outline weight, and lighting across the set, and beats a chain of edits or separate calls. Reuse the finished sheet as `style_asset_ids` for the next set.
+
+**Objects at a scene's exact scale and position.** To cut props out of a generated scene, edit the scene with `edit_asset_id` and a prompt like "Keep only the torches, chest, and banner exactly where they are, at the same size. Fill everything else with flat pure magenta #FF00FF." Key out the magenta locally. This keeps each object at the scene's pixel scale and position. A reference generation of a single prop does not.
+
+**Clean background plates.** "Remove the X" edits on a full scene keep the rest of the composition almost pixel for pixel. Use them for background plates and for masks (original minus plate). They are more reliable than "keep only X on solid green".
+
+**Tiny pixel edits.** For a 1-2 px detail such as a string, eye, or trim, ask to change what exists: "Recolor the existing thin dark bowstring line to light cream. Change nothing else." Prompts like "make" or "draw" a detail can erase the original instead.
+
+**Palette.** `colors` steers the palette, but pixel outputs still contain hundreds or thousands of near-duplicate shades. When the user needs a strict indexed palette (for example 4 or 16 colors), quantize the downloaded sprite locally with nearest-color mapping and no dithering.
+
+**White parts with transparent backgrounds.** `bg_mode="transparent"` can cut out large white areas inside a subject, such as a blank label. Ask for an off-white or colored fill, or use `bg_mode="white"` and remove the background separately.
+
+**A single composed UI screen.** `generate_game_art(mode="ui")` also works for one composed screen or HUD image for a mockup, thumbnail, or marketing art, where reusable parts are not needed. GPT image models render readable UI text more reliably than Gemini at this size. For reusable parts, use `spritecook-build-ui-kits`.
 
 ### `list_generation_models`
 
@@ -116,7 +155,7 @@ Perspectives and preset animations:
 
 ### `generate_character`
 
-Generate a base pixel-art character with SpriteCook's recommended character settings: 64x64, transparent background, 1K square, tight smart crop, and the perspective-specific character prompt rewrite. Returns a job immediately by default; when complete, the first generated asset is the `character_id`.
+Generate a base pixel-art character with SpriteCook's recommended character settings: a 64x64 size hint, transparent background, 1K square, tight smart crop, and the perspective-specific character prompt rewrite. The final canvas is often 56-170 px, so check the returned size. Returns a job immediately by default; when complete, the first generated asset is the `character_id`. This tool has no `project_id`; move the result with `assign_assets_to_project` when it belongs in a project.
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
@@ -132,12 +171,16 @@ Generate preset and/or custom animations for a base character asset. Returns a c
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `character_id` | string (required) | - | Base character asset id returned by `generate_character` |
+| `character_id` | string (required) | - | Base character asset id: a `generate_character` result or any owned character still, including an edited, uploaded, or sliced sprite |
 | `perspective` | string (required) | - | Same perspective used for the base character |
 | `animation_ids` | string[] | perspective defaults | Preset ids from `list_character_workflows` |
 | `custom_animations` | object[] | null | Custom animations with `{ id, label, prompt, source_view, output_frames }` |
 | `bg_removal_provider` | string | "basic" | `basic` or `photoroom` |
 | `wait_seconds` | int | 0 | Optional bounded wait from 0-90 seconds before returning the polling contract |
+
+Character animation runs use `pixel-engine-v1.1`; this tool has no `model` argument. For `pixel-engine-v1.5`, animate each motion separately with `animate_game_art` on the same still (see `spritecook-animate-assets`). Run outputs use their own canvas, which is usually larger than the base still and not aligned to it; match frame 0 against the still locally when the hand-off must not jump. Fast jumps and overhead swings can touch the canvas edge, so check those frames. Two identical calls sent together can return the same run; send one call per take you want.
+
+Passing any owned still as `character_id` is often the best way to animate a character that matches an existing art style. Give uploaded or sliced assets a descriptive label first with `update_asset_label`, because the label can feed the automatic animation prompt.
 
 Custom animations use the custom prompt as the final animation prompt and skip preset prompt enhancement. `source_view` defaults to `front_idle`; if another source view needs prep, SpriteCook uses the matching workflow prep dependency for that perspective. A `source_view` selects a supported workflow input, not an arbitrary new state such as curled-up sleep. For a custom state that needs a different starting pose, prepare the still with `generate_game_art` first, then use `animate_game_art` on that prepared asset.
 

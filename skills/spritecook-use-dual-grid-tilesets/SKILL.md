@@ -118,10 +118,42 @@ function renderDualGrid(ctx, atlasImage, cells: CellMap, columns: number, rows: 
 }
 ```
 
+## Two-Surface Tilesets
+
+Tilesets generated with `edges="two_surfaces"` (for example grass and water) have a second terrain. The frame lookup never uses atlas frame 12 (column 0, row 3, the bottom-left cell). In a two-surface set that cell holds the full counter-surface tile, such as open water.
+
+Draw the counter surface first, then the masked pieces on top:
+
+```ts
+const counterSurfaceCell = { column: 0, row: 3 }
+
+function renderTwoSurfaceDualGrid(ctx, atlasImage, cells: CellMap, columns: number, rows: number, tileSize: number) {
+  for (let y = 0; y <= rows; y += 1) {
+    for (let x = 0; x <= columns; x += 1) {
+      ctx.drawImage(
+        atlasImage,
+        counterSurfaceCell.column * tileSize,
+        counterSurfaceCell.row * tileSize,
+        tileSize,
+        tileSize,
+        x * tileSize,
+        y * tileSize,
+        tileSize,
+        tileSize,
+      )
+    }
+  }
+  renderDualGrid(ctx, atlasImage, cells, columns, rows, tileSize)
+}
+```
+
+Without this base layer, mask `0` areas render transparent and the second terrain disappears. For a single-surface (`transparent` edges) set, that cell is empty; skip the base layer.
+
 ## Practical Notes
 
 - Render one more tile column and row than the logical map size because rendered tiles sit around painted logical cells.
 - For pixel art, disable smoothing and use nearest-neighbor scaling.
-- Treat mask `15` as the filled interior tile and mask `0` as transparent/no draw.
+- Treat mask `15` as the filled interior tile and mask `0` as transparent/no draw. In a two-surface set, mask `0` shows the counter-surface base layer.
+- Paint a test map before shipping a set. If the full tile (mask `15`) doesn't wrap, large filled areas show a visible checkerboard.
 - Use the generated atlas exactly as a 4x4 grid of equal tile-sized cells.
 - Do not reinterpret the sheet as a normal 8-neighbor blob tileset; this mapping is specifically SpriteCook's dual-grid 15-piece layout.
