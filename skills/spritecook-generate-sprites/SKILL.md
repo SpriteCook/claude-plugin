@@ -20,6 +20,18 @@ For a complete UI screen or cohesive UI system, stop and use `spritecook-build-u
 - Keep the reference limits: `generate_game_art` accepts up to 14 reference images in total across `style_asset_ids` plus a `reference_asset_id` or `edit_asset_id`. The selected model's own limit can be lower; `list_generation_models` reports it.
 - Complete UI kits follow `spritecook-build-ui-kits` and its own model default.
 
+## Exact-Size Sprites: Pixel Engine Image
+
+Use Pixel Engine Image (`model="pixel-engine-image-v1"`) when one sprite or UI piece must come back at an exact small size, such as a 32×32 item icon or a 16×16 pickup.
+
+- It draws exactly `width` × `height`. Sides are 16 to 128 px, the longest side at most 4× the shortest, and both sides even once the longest passes 64 px. Larger requests are scaled down to fit. `resolved_parameters.size_behavior` is `"exact"` for this model instead of `"hint"`.
+- The background comes back already removed, so there is no separate removal step or charge. `smart_crop` is ignored and `resolution` is always `1K`.
+- It is text only. Do not pass `style_asset_ids`, `reference_asset_id`, or `edit_asset_id`: requests with any reference image are rejected. It cannot match an existing collection through references, so put the shared look in `theme` and `style` and reuse the same wording for every sprite in the set. When the result must match existing art closely, use Nano Banana 2.1 or Pro with style references instead.
+- Pixel art only: use `pixel=true` and `mode="assets"` or `mode="ui"`. It is not available for textures, tilesets, or UI kits. Character animation preps on a Pixel Engine Image sprite run on the default model.
+- It draws one subject per image. Do not ask it for 3×3 sheets; call it once per sprite, or use `variations` for alternatives of the same sprite.
+- Editing a Pixel Engine Image asset needs another model, because this one takes no input image. Pass the edit model explicitly with `edit_asset_id`.
+- Check `list_generation_models` for its current price; its entry includes `exact_output_size`.
+
 ## Generating Multiple Assets in a Grid
 
 Generating assets together in a 3×3 or 4×4 grid is generally recommended when you need several related props, items, or decorations, or when you want to achieve smaller pixel art. This produces multiple assets in one generation, which can save the user credits compared with generating every asset separately, and helps keep the collection visually consistent.
@@ -70,8 +82,8 @@ Generate game art assets from a text prompt. Supports both pixel art and detaile
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `prompt` | string (required) | - | What to generate. Be specific about subject, pose, and view angle |
-| `width` | int | 64 | Width hint in pixels (16-512); see Output Size below |
-| `height` | int | 64 | Height hint in pixels (16-512); see Output Size below |
+| `width` | int | 64 | Width hint in pixels (16-512); exact (16-128) with `pixel-engine-image-v1`. See Output Size below |
+| `height` | int | 64 | Height hint in pixels (16-512); exact (16-128) with `pixel-engine-image-v1`. See Output Size below |
 | `variations` | int | 1 | Number of variations (1-4) |
 | `pixel` | bool | true | True for pixel art, false for detailed/HD art |
 | `bg_mode` | string | "transparent" | "transparent", "white", or "include" |
@@ -105,7 +117,7 @@ If the user provides local image file paths for these references, use `spritecoo
 
 ## Output Size
 
-`width` and `height` are hints (`size_behavior: "hint"` in `resolved_parameters`), not a hard canvas size. In pixel mode the final canvas follows the detected pixel grid and the content crop, so it can differ a lot from the request. Variations from one job can also come back at different sizes.
+`width` and `height` are hints (`size_behavior: "hint"` in `resolved_parameters`), not a hard canvas size. The one exception is Pixel Engine Image (`pixel-engine-image-v1`), which returns exactly the requested size; see Exact-Size Sprites above. In pixel mode the final canvas follows the detected pixel grid and the content crop, so it can differ a lot from the request. Variations from one job can also come back at different sizes.
 
 - Read `resolved_parameters.output_dimensions` or each asset's `width`/`height` before planning a layout. Do not assume the requested size.
 - Small requests usually land larger: a 16-48 px request for a detailed subject commonly returns 40-90 px. Describe the size in the prompt too, for example "tiny low-resolution sprite, about 32 pixels tall".
@@ -114,6 +126,9 @@ If the user provides local image file paths for these references, use `spritecoo
 - `generate_character` aims for about 64 px but often returns 56-170 px canvases depending on model and subject.
 
 To get a sprite at a specific small size:
+
+- If no reference image is needed, use Pixel Engine Image (`model="pixel-engine-image-v1"`) and set `width` and `height` to the target size. The output is exactly that size.
+- When the sprite must follow a reference or match existing art, use this redraw route instead:
 
 1. Generate at the model's natural size and pick the best design.
 2. Downscale it locally with nearest-neighbor to the target size (for example by half), then upload it through `spritecook-upload-assets`.
