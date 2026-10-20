@@ -9,7 +9,7 @@ Use this alongside the SpriteCook image or animation skill when the user request
 
 **Requires:** A connected SpriteCook MCP server. If disconnected, use the host's native SpriteCook connection flow. For editors without native connection support, explain the documented setup options only when setup is needed; do not install or run setup software without the user's request.
 
-SpriteCook skills version: 2026.10.16
+SpriteCook skills version: 2026.10.20
 
 ## Task Scope and Tool Results
 
