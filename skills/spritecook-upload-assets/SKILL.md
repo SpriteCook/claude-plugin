@@ -39,7 +39,7 @@ Do not print base64 to the terminal or create temporary files containing tokens 
 
 - Use `reference_asset_id` when the uploaded asset is one specific source or context image.
 - Use `edit_asset_id` only when the uploaded asset is the one image being directly modified.
-- Use `style_asset_ids` on `generate_game_art` when uploaded assets are ambient style guides; pass up to 10 IDs.
+- Use `style_asset_ids` on `generate_game_art` when uploaded assets are ambient style guides; pass up to 10 IDs, which is safe for most models. Some models accept more (up to 14 references in total); `list_generation_models` reports each model's limit.
 - Use `style_asset_id` on `generate_tileset` for one tileset style guide image.
 - Use `asset_id` on `animate_game_art` when the uploaded asset is the source to animate.
 

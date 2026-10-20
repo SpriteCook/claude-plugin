@@ -17,7 +17,7 @@ For a complete UI screen or cohesive UI system, stop and use `spritecook-build-u
 - Keep explicit user choices and saved preset models. For edits, preserve the source model inherited by the tool unless the user requests a model change.
 - Check `list_generation_models` for current availability and prices. Nano Banana 2.1 retains NB2's base 12 / 18 / 30 credits at 1K / 2K / 4K at release. Source resolution is separate from the requested pixel-art dimensions and does not guarantee an exact final canvas size.
 - For transparent sprites, continue using `background="transparent"`; SpriteCook removes the background after generation. NB2.1 does not produce native alpha transparency.
-- Keep the reference limits: `generate_game_art` accepts up to 14 reference images in total across `style_asset_ids` plus a `reference_asset_id` or `edit_asset_id`. The selected model's own limit can be lower; `list_generation_models` reports it.
+- Keep the reference limits: `generate_game_art` accepts up to 14 reference images in total across `style_asset_ids` plus a `reference_asset_id` or `edit_asset_id`. The limit depends on the model and can be lower; `list_generation_models` reports it. Up to 10 is safe for most models.
 - Complete UI kits follow `spritecook-build-ui-kits` and its own model default.
 
 ## Exact-Size Sprites: Pixel Engine Image
@@ -97,7 +97,7 @@ Generate game art assets from a text prompt. Supports both pixel art and detaile
 | `resolution` | string | "1K" | "1K", "2K", or "4K" |
 | `quality` | string | "medium" | GPT-Image-2 quality tier: "low", "medium", or "high". Higher quality costs more credits. |
 | `colors` | string[] | null | Hex palette guidance, max 64. Guides the colors; the output is not an indexed palette |
-| `style_asset_ids` | string[] | null | Owned asset IDs to use as ambient style guide images; up to 14 references in total, model limits apply |
+| `style_asset_ids` | string[] | null | Owned asset IDs to use as ambient style guide images; up to 14 references in total depending on the model; 10 is safe for most |
 | `project_id` | string | null | Owned project to place the new assets in |
 | `reference_asset_id` | string | null | Asset ID to use as one specific visual/context reference |
 | `edit_asset_id` | string | null | Asset ID to edit/modify with the new prompt |
