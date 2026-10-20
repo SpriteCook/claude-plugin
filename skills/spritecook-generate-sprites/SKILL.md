@@ -113,6 +113,7 @@ If the user provides local image file paths for these references, use `spritecoo
 - Use `reference_asset_id` when one specific asset is the source or context for the prompt, such as `make a building in a similar style to this one`, `give me just the door sprite`, or `use this character as the visual reference`.
 - Use `edit_asset_id` when the user wants a direct modification of one existing asset, such as `make this roof red`, `remove the sign`, or `change the helmet color`.
 - A reference also carries over its flaws, such as noise or stray pixels. Clean a reference before reusing it.
+- Style references also set the pixel scale. New art follows the references' pixel density more than `width` and `height`, so a grid sheet guided by one full-size character can come back with very small items.
 - `reference_asset_id` copies the reference's pixel size closely, and several variations of a close reference can return near copies of it. Use `variations=1` or `2` for a reference redraw and say in the prompt what must change.
 
 ## Output Size
