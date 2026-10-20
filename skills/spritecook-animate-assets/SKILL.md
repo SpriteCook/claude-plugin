@@ -22,7 +22,8 @@ Animate an existing SpriteCook asset into a short pixel-art or detailed animatio
 | `asset_id` | string (required) | - | Existing SpriteCook asset ID to animate |
 | `prompt` | string (required) | - | Describe the exact motion over time. If `auto_enhance_prompt=true`, simple prompts like "Idle" or "Attack" are acceptable |
 | `auto_enhance_prompt` | bool | true | Inspect the source asset and expand short prompts into a fuller animation prompt |
-| `edge_margin` | int | 6 | Adds spacing on all sides before animation framing |
+| `edge_margin` | int | 6 | Spacing added before animation framing. Pixel art stands on the bottom edge as a ground line, so the margin goes on the sides and top |
+| `vertical_align` | string | null | Pixel art only. `"center"` for flying, floating or bouncing subjects, so `edge_margin` also leaves room below. Omit to keep the ground line |
 | `pixel` | bool | null | Optional mode override. If omitted, SpriteCook infers the mode from the asset |
 | `model` | string | mode default | `pixel-engine-v1.1`, `frame-engine-v1.1`, or `pixel-engine-v1.5`. Omit for the v1.1 default |
 | `output_frames` | int | 8 | v1.1 uses even counts (pixel 2-16, detailed 2-24); v1.5 accepts 3-16 whole-number frames |
@@ -79,7 +80,7 @@ The upload/import step is where the source image enters SpriteCook. It is not th
 - Detailed animation is the correct choice for assets between `256x256` and `2048x2048`.
 - Do not force a sub-256 source into detailed mode.
 - Source aspect ratio must be between 1:2 and 2:1.
-- Keep `edge_margin=6` by default. It helps prevent pixel art from crowding the canvas edge. It is a percentage, so very small sprites gain only a pixel or two; raise it for motions that reach outward, such as a lid opening or a wide swing.
+- Keep `edge_margin=6` by default. It helps prevent pixel art from crowding the canvas edge. It is a percentage, so very small sprites gain only a pixel or two; raise it for motions that reach outward, such as a lid opening or a wide swing. For a subject that leaves the ground, such as a flying bat or a bouncing slime, pass `vertical_align="center"` and raise `edge_margin` for big stretches or jumps.
 
 ## Choosing an Engine
 
